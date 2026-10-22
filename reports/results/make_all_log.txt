@@ -1,0 +1,391 @@
+.venv/bin/python scripts/ingest.py
+env_rows: 179447
+env_sensors: 5
+env_time_range: 2023-05-06 08:42:45+10:00 .. 2026-04-22 23:12:41+10:00
+env_duplicates: 136604
+env_flagged: {'co2_ppm': 0, 'temp_c': 0, 'rh_pct': 0, 'pressure_mb': 0}
+frozen_sensors: ['6012002000227', '6012002000241', '6012002000777']
+occ_spaces: 5
+room_tables: 3
+env_load_s: 9.469053508999878
+occ_load_s: 16.15206577300023
+aggregate_0f3f37f8_s: 0.25877463100005116
+aggregate_227f1068_s: 0.22969028899979094
+aggregate_3e5a14df_s: 0.1250015989999156
+aggregate_941f0352_s: 0.38039023800001814
+aggregate_cca1ac3e_s: 0.4271109199999046
+     sensorid                         floorspaceid space_room  overlap_days      r  r_resid    role
+6012002000869 3e5a14df-4b14-4ea5-bb9d-46577c6dc9c8    unknown        25.188  0.702    0.647 primary
+6012002000869 941f0352-bb69-47d0-a9c5-ac29eb4f7319    unknown        60.500  0.523    0.407 control
+6012002000869 0f3f37f8-0335-41e0-ae87-a1d677dfc7d7    unknown        71.552  0.452    0.333 control
+6012002000869 227f1068-9e41-469f-bef0-275f27a0bdba    60-G.25        66.854  0.417    0.267  unused
+6012002000869 cca1ac3e-f81f-4ebb-aa2b-8b0bf3e9e53b    60-G.20        46.740  0.249    0.162  unused
+6012002000326 0f3f37f8-0335-41e0-ae87-a1d677dfc7d7    unknown        88.760 -0.125    0.018  unused
+6012002000326 941f0352-bb69-47d0-a9c5-ac29eb4f7319    unknown        95.510 -0.173    0.013  unused
+6012002000326 cca1ac3e-f81f-4ebb-aa2b-8b0bf3e9e53b    60-G.20        80.448 -0.069   -0.007  unused
+6012002000326 227f1068-9e41-469f-bef0-275f27a0bdba    60-G.25       141.396 -0.139   -0.024  unused
+6012002000326 3e5a14df-4b14-4ea5-bb9d-46577c6dc9c8    unknown         0.000    NaN      NaN  unused
+.venv/bin/python scripts/run_experiment.py --synthetic
+room synthetic_0: 4031 rows, occupancy coverage 100%
+room synthetic_1: 4031 rows, occupancy coverage 100%
+room synthetic_2: 4031 rows, occupancy coverage 100%
+room synthetic_3: 4031 rows, occupancy coverage 100%
+               mae  rmse    r2    f1  fit_s  predict_s
+model                                                 
+forest+phys  0.100 0.280 0.981 0.987  0.573      0.074
+mlp+phys     0.118 0.279 0.980 0.979  0.690      0.001
+mlp          0.140 0.334 0.971 0.975  0.530      0.001
+forest       0.152 0.406 0.959 0.972  0.563      0.080
+svr          0.176 0.418 0.960 0.961  0.157      0.013
+physics      0.182 0.345 0.966 0.925  0.020      0.025
+tree         0.201 0.517 0.931 0.963  0.014      0.000
+linear       0.225 0.411 0.956 0.902  0.003      0.001
+time_of_week 0.391 1.040 0.705 0.916  0.002      0.007
+
+Blocked leave-one-week-out CV (pooled out-of-fold):
+room          synthetic_0  synthetic_1  synthetic_2  synthetic_3
+model                                                           
+forest              0.169        0.074        0.284        0.121
+forest+phys         0.128        0.039        0.263        0.076
+linear              0.283        0.143        0.488        0.191
+mlp                 0.163        0.092        0.282        0.125
+mlp+phys            0.140        0.076        0.274        0.097
+physics             0.239        0.100        0.715        0.130
+svr                 0.186        0.102        0.352        0.144
+time_of_week        0.487        0.256        1.316        0.343
+tree                0.217        0.093        0.339        0.158
+room          synthetic_0  synthetic_1  synthetic_2  synthetic_3
+model                                                           
+forest              0.953        0.962        0.975        0.950
+forest+phys         0.973        0.983        0.979        0.974
+linear              0.948        0.949        0.968        0.945
+mlp                 0.968        0.964        0.980        0.962
+mlp+phys            0.975        0.977        0.982        0.974
+physics             0.962        0.970        0.939        0.967
+svr                 0.954        0.953        0.958        0.939
+time_of_week        0.676        0.692        0.548        0.669
+tree                0.930        0.932        0.965        0.918
+       room    V_m3  Q_m3s   ACH  C_out_ppm
+synthetic_0 159.660  0.122 2.761    419.414
+synthetic_1  70.301  0.033 1.700    419.678
+synthetic_2 415.832  0.424 3.669    418.694
+synthetic_3  96.957  0.037 1.385    419.685
+.venv/bin/python scripts/run_experiment.py --data data/processed/rooms.parquet
+room 6012002000869|0f3f37f8|control: 10127 rows, occupancy coverage 68%
+room 6012002000869|3e5a14df|primary: 10127 rows, occupancy coverage 24%
+room 6012002000869|941f0352|control: 10127 rows, occupancy coverage 57%
+               mae  rmse     r2    f1  fit_s  predict_s
+model                                                  
+forest+phys  0.494 0.592 -0.501 0.613  1.272      0.081
+forest       0.507 0.606 -0.655 0.602  1.201      0.092
+mlp+phys     0.512 0.635 -1.011 0.643  0.724      0.001
+svr          0.522 0.655 -1.059 0.621  1.971      0.205
+physics      0.542 0.655 -1.582 0.576  0.003      0.001
+mlp          0.543 0.676 -1.219 0.613  0.989      0.001
+tree         0.548 0.680 -1.072 0.575  0.029      0.001
+linear       0.577 0.677 -1.899 0.598  0.006      0.001
+time_of_week 0.872 1.043 -5.844 0.581  0.002      0.016
+
+Blocked leave-one-week-out CV (pooled out-of-fold):
+room          6012002000869|0f3f37f8|control  ...  6012002000869|941f0352|control
+model                                         ...                                
+forest                                 0.547  ...                           0.596
+forest+phys                            0.544  ...                           0.595
+linear                                 0.547  ...                           0.613
+mlp                                    0.563  ...                           0.602
+mlp+phys                               0.580  ...                           0.615
+physics                                0.595  ...                           0.656
+svr                                    0.567  ...                           0.641
+time_of_week                           0.601  ...                           0.659
+tree                                   0.577  ...                           0.639
+
+[9 rows x 3 columns]
+room          6012002000869|0f3f37f8|control  ...  6012002000869|941f0352|control
+model                                         ...                                
+forest                                 0.271  ...                           0.397
+forest+phys                            0.280  ...                           0.400
+linear                                 0.286  ...                           0.368
+mlp                                    0.246  ...                           0.377
+mlp+phys                               0.221  ...                           0.355
+physics                                0.174  ...                           0.267
+svr                                    0.212  ...                           0.294
+time_of_week                           0.146  ...                           0.262
+tree                                   0.188  ...                           0.294
+
+[9 rows x 3 columns]
+                          room    V_m3  Q_m3s   ACH  C_out_ppm
+6012002000869|0f3f37f8|control  52.888  0.048 3.294    367.452
+6012002000869|3e5a14df|primary 460.069  0.252 1.974    432.726
+6012002000869|941f0352|control  59.878  0.063 3.794    395.200
+.venv/bin/python scripts/sensitivity_synthetic.py
+1. convergence
+  wrote reports/results/synthetic/convergence.csv
+  wrote reports/figures/fig_convergence.png
+method
+euler    0.971559
+rk4      4.136322
+method  h_s  error_ppm  pairwise_order  fitted_order
+ euler 37.5     0.9682             NaN        0.9716
+ euler   75      1.931          0.9957        0.9716
+ euler  150      3.835          0.9901        0.9716
+ euler  300      7.534          0.9743        0.9716
+ euler  600      14.21          0.9156        0.9716
+   rk4 37.5  5.068e-07             NaN         4.136
+   rk4   75  8.324e-06           4.038         4.136
+   rk4  150  0.0001403           4.075         4.136
+   rk4  300   0.002493           4.151         4.136
+   rk4  600    0.04926           4.305         4.136
+2. Euler stability
+  wrote reports/figures/fig_euler_stability.png
+3. sensitivity sweep
+  wrote reports/results/synthetic/sensitivity_grid.csv
+  wrote reports/figures/fig_sensitivity_dt.png
+  wrote reports/figures/fig_sensitivity_noise.png
+
+Grid sweep, report interval ~120 s (mean over seeds):
+                 V_relerr  Q_relerr  Cout_abs_err    mae   rmse
+dt_min scheme                                                  
+5.0    backward   -0.9574   -0.0269        1.2398 0.3362 0.7225
+       central    -0.6032   -0.0230        1.0610 0.3101 0.5705
+       savgol     -0.2180   -0.0231        1.0682 0.2538 0.4357
+10.0   backward   -0.8093   -0.0335        1.5318 0.3364 0.6430
+       central    -0.2798   -0.0203        0.9374 0.2516 0.4250
+       savgol      0.0129   -0.0203        0.9387 0.2170 0.3765
+15.0   backward   -0.6739   -0.0462        2.1590 0.3311 0.6121
+       central    -0.1186   -0.0247        1.1645 0.2289 0.3877
+       savgol      0.1490   -0.0248        1.1730 0.2244 0.4031
+30.0   backward   -0.5555   -0.0609        2.8783 0.3007 0.5380
+       central     0.0622   -0.0284        1.3497 0.2063 0.3503
+       savgol      0.2788   -0.0284        1.3463 0.2401 0.4425
+
+Grid sweep, report interval ~600 s (mean over seeds):
+                 V_relerr  Q_relerr  Cout_abs_err    mae   rmse
+dt_min scheme                                                  
+5.0    backward   -0.7623   -0.0279        1.1910 0.3318 0.6598
+       central    -0.4902   -0.0186        0.7650 0.2961 0.5531
+       savgol     -0.2795   -0.0205        0.8743 0.2712 0.4934
+10.0   backward   -0.6539   -0.0333        1.4551 0.3210 0.5952
+       central    -0.2519   -0.0164        0.6314 0.2525 0.4431
+       savgol     -0.0392   -0.0194        0.7828 0.2360 0.4196
+15.0   backward   -0.5630   -0.0435        1.9466 0.3190 0.5777
+       central    -0.0823   -0.0190        0.7582 0.2340 0.4029
+       savgol      0.0914   -0.0223        0.8942 0.2370 0.4260
+30.0   backward   -0.4907   -0.0605        2.3599 0.2939 0.5187
+       central     0.0888   -0.0257        0.6074 0.2039 0.3438
+       savgol      0.1162   -0.0290        0.7355 0.2463 0.4630
+
+Seed 0, report interval 120 s:
+ freq   scheme  V_relerr  Q_relerr  Cout_abs_err    mae   rmse
+ 5min backward   -0.9444   -0.0246        1.2752 0.3248 0.6962
+ 5min  central   -0.5862   -0.0201        1.0518 0.3029 0.5605
+ 5min   savgol   -0.2092   -0.0202        1.0651 0.2583 0.4516
+10min backward   -0.7923   -0.0330        1.7032 0.3249 0.6158
+10min  central   -0.2639   -0.0203        1.0829 0.2497 0.4255
+10min   savgol    0.0060   -0.0204        1.1013 0.2204 0.3837
+15min backward   -0.6483   -0.0408        2.3174 0.3305 0.5850
+15min  central   -0.1043   -0.0196        1.2498 0.2332 0.3893
+15min   savgol    0.1374   -0.0196        1.2552 0.2242 0.3968
+30min backward   -0.5135   -0.0575        3.2787 0.2972 0.5107
+30min  central    0.0591   -0.0248        1.5993 0.2007 0.3341
+30min   savgol    0.2690   -0.0249        1.6178 0.2218 0.4367
+
+Noise sweep (mean over seeds):
+           V_relerr  Q_relerr  Cout_abs_err    mae   rmse
+noise_ppm                                                
+0.0          0.2288    0.0012        0.0592 0.1012 0.3238
+5.0          0.2101   -0.0020        0.1217 0.1413 0.3357
+15.0         0.0914   -0.0223        0.8942 0.2370 0.4260
+30.0        -0.1706   -0.0822        3.7100 0.3925 0.6369
+50.0        -0.4620   -0.1971       10.3974 0.5950 0.9256
+
+Noise sweep seed 0:
+ noise_ppm  V_relerr  Q_relerr  Cout_abs_err    mae   rmse
+    0.0000    0.1353   -0.0033        0.0102 0.0941 0.3324
+    5.0000    0.1170   -0.0073        0.2003 0.1328 0.3451
+   15.0000    0.0209   -0.0273        1.2325 0.2300 0.4362
+   30.0000   -0.1920   -0.0831        4.2323 0.3878 0.6407
+   50.0000   -0.4435   -0.1896       11.0029 0.5832 0.9071
+
+NaN (failed calibrations): 0 of 145 runs
+4. alignment
+  wrote reports/results/synthetic/alignment.csv
+
+Alignment check (mean over seeds, savgol):
+ sample_mean_s  freq       variant  V_relerr  Q_relerr  Cout_abs_err    mae   rmse
+      120.0000  5min  anti_centred   -0.0887   -0.0534        2.4784 0.3048 0.5592
+      120.0000  5min       centred   -0.2180   -0.0231        1.0682 0.2538 0.4357
+      120.0000  5min interval_mean   -0.1544   -0.0350        1.6115 0.2704 0.4746
+      120.0000 10min  anti_centred    0.3862   -0.0801        3.7939 0.3053 0.5665
+      120.0000 10min       centred    0.0129   -0.0203        0.9387 0.2170 0.3765
+      120.0000 10min interval_mean    0.2353   -0.0497        2.2948 0.2575 0.4602
+      120.0000 15min  anti_centred    0.7364   -0.1147        5.6546 0.3471 0.6529
+      120.0000 15min       centred    0.1490   -0.0248        1.1730 0.2244 0.4031
+      120.0000 15min interval_mean    0.4861   -0.0659        3.1149 0.2722 0.4954
+      120.0000 30min  anti_centred    1.7223   -0.1963       10.5878 0.4539 0.8237
+      120.0000 30min       centred    0.2788   -0.0284        1.3463 0.2401 0.4425
+      120.0000 30min interval_mean    1.1386   -0.1093        5.3614 0.3525 0.6727
+      600.0000  5min  anti_centred   -0.1479   -0.0478        2.1584 0.3132 0.5771
+      600.0000  5min       centred   -0.2795   -0.0205        0.8743 0.2712 0.4934
+      600.0000  5min interval_mean   -0.2179   -0.0310        1.3599 0.2851 0.5191
+      600.0000 10min  anti_centred    0.3169   -0.0756        3.4870 0.3117 0.5747
+      600.0000 10min       centred   -0.0392   -0.0194        0.7828 0.2360 0.4196
+      600.0000 10min interval_mean    0.1695   -0.0461        2.0244 0.2688 0.4809
+      600.0000 15min  anti_centred    0.6301   -0.1087        5.1703 0.3519 0.6629
+      600.0000 15min       centred    0.0914   -0.0223        0.8942 0.2370 0.4260
+      600.0000 15min interval_mean    0.4012   -0.0608        2.6904 0.2780 0.5049
+      600.0000 30min  anti_centred    1.3520   -0.1926        9.5735 0.4615 0.8629
+      600.0000 30min       centred    0.1162   -0.0290        0.7355 0.2463 0.4630
+      600.0000 30min interval_mean    0.8546   -0.1069        4.4864 0.3569 0.6988
+
+15min, default room, seed 0:
+      variant  V_relerr  Q_relerr  Cout_abs_err    mae   rmse
+interval_mean    0.3099   -0.0626        3.0657 0.2674 0.4836
+      centred    0.0209   -0.0273        1.2325 0.2300 0.4362
+ anti_centred    0.5377   -0.1046        5.4989 0.3289 0.6404
+
+total runtime 8.1 s
+.venv/bin/python scripts/sensitivity_real.py
+ grid   scheme   mae    r2    f1  V_median  ACH_median  folds_ok
+10min backward 1.628 0.448 0.832    75.079      12.066         7
+10min  central 1.617 0.458 0.830   204.725       4.455         7
+10min  savgol3 1.617 0.458 0.830   204.781       4.454         7
+10min  savgol5 1.613 0.463 0.827   328.895       2.774         7
+10min  savgol7 1.611 0.464 0.828   414.454       2.202         7
+15min backward 1.375 0.488 0.798    22.928      39.224         5
+15min  central 1.599 0.464 0.836   245.899       3.683         7
+15min  savgol3 1.598 0.464 0.835   244.923       3.697         7
+15min  savgol5 1.594 0.467 0.833   411.953       2.198         7
+15min  savgol7 1.595 0.466 0.833   497.352       1.822         7
+30min backward 1.463 0.490 0.823    89.308      10.063         6
+30min  central 1.542 0.484 0.836   382.565       2.373         7
+30min  savgol3 1.542 0.484 0.836   382.680       2.372         7
+30min  savgol5 1.542 0.481 0.834   499.508       1.818         7
+30min  savgol7 1.544 0.477 0.836   544.550       1.668         7
+   g_m3s     mae       r2   V_median  Q_median  max_abs_pred_diff_vs_nominal
+0.000003 1.59364 0.467438 277.276273  0.169316                  3.552714e-15
+0.000005 1.59364 0.467438 411.953320  0.251555                  0.000000e+00
+0.000007 1.59364 0.467438 554.552546  0.338632                  3.552714e-15
+/home/user/mma3001_project/.venv/lib/python3.13/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (500) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/home/user/mma3001_project/.venv/lib/python3.13/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (500) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/home/user/mma3001_project/.venv/lib/python3.13/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (500) reached and the optimization hasn't converged yet.
+  warnings.warn(
+/home/user/mma3001_project/.venv/lib/python3.13/site-packages/sklearn/neural_network/_multilayer_perceptron.py:785: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (500) reached and the optimization hasn't converged yet.
+  warnings.warn(
+ model                      setting   mae    r2
+forest               depth=4,leaf=5 1.499 0.511
+forest              depth=4,leaf=20 1.480 0.528
+forest              depth=4,leaf=50 1.469 0.534
+forest               depth=8,leaf=5 1.514 0.504
+forest              depth=8,leaf=20 1.483 0.527
+forest              depth=8,leaf=50 1.470 0.536
+forest              depth=12,leaf=5 1.515 0.505
+forest             depth=12,leaf=20 1.483 0.527
+forest             depth=12,leaf=50 1.469 0.536
+forest            depth=None,leaf=5 1.515 0.505
+forest           depth=None,leaf=20 1.483 0.527
+forest           depth=None,leaf=50 1.469 0.536
+   mlp    hidden=(16,),alpha=0.0001 1.774 0.370
+   mlp      hidden=(16,),alpha=0.01 1.760 0.373
+   mlp       hidden=(16,),alpha=1.0 1.717 0.397
+   mlp hidden=(32, 16),alpha=0.0001 1.689 0.369
+   mlp   hidden=(32, 16),alpha=0.01 1.701 0.361
+   mlp    hidden=(32, 16),alpha=1.0 1.699 0.370
+   mlp hidden=(64, 32),alpha=0.0001 1.715 0.347
+   mlp   hidden=(64, 32),alpha=0.01 1.707 0.358
+   mlp    hidden=(64, 32),alpha=1.0 1.743 0.338
+                mae            r2       
+               mean    std   mean    std
+model   days                            
+forest  1     2.518  0.320 -0.282  0.137
+        2     2.439  0.076 -0.260  0.117
+        4     1.973  0.312  0.105  0.216
+        7     1.706  0.021  0.336  0.099
+        14    1.660  0.135  0.413  0.102
+linear  1     2.829  0.239 -0.558  0.309
+        2     2.534  0.139 -0.358  0.089
+        4     2.281  0.406 -0.079  0.348
+        7     1.860  0.130  0.302  0.093
+        14    1.702  0.111  0.423  0.063
+physics 1     1.426  0.534 -0.345  0.997
+        2     2.073  0.086  0.113  0.084
+        4     1.420  0.055  0.452  0.089
+        7     1.691  0.060  0.375  0.084
+        14    1.605  0.025  0.465  0.027
+.venv/bin/python scripts/profile_performance.py
+case     exact_lfilter  exact_loop  inverse_central  inverse_savgol  rk4_loop
+n                                                                            
+1000              13.3       314.0             14.9           326.4    2004.6
+10000              8.1       299.5              5.4            60.4    2076.0
+100000             7.4       294.1              6.1            17.8    1900.4
+1000000            7.5         NaN              8.3            21.4       NaN
+                              method  flops  bytes  arith_intensity_flop_per_byte
+                          Euler step      7     24                           0.29
+                            RK4 step     32     24                           1.33
+                exact step (lfilter)      6     24                           0.25
+               inverse, central diff      8     16                           0.50
+          inverse, Savitzky-Golay(5)     15     16                           0.94
+          MLP inference (24-64-32-1)   7328    200                          36.64
+random forest (200 trees, depth<=12)   2400    192                          12.50
+room synthetic_0: 4031 rows, occupancy coverage 100%
+room synthetic_1: 4031 rows, occupancy coverage 100%
+room synthetic_2: 4031 rows, occupancy coverage 100%
+room synthetic_3: 4031 rows, occupancy coverage 100%
+               mae  rmse    r2    f1  fit_s  predict_s
+model                                                 
+forest+phys  0.100 0.280 0.981 0.987  0.644      0.130
+mlp+phys     0.118 0.279 0.980 0.979  0.795      0.001
+mlp          0.140 0.334 0.971 0.975  0.695      0.002
+forest       0.152 0.406 0.959 0.972  0.704      0.126
+svr          0.176 0.418 0.960 0.961  0.176      0.015
+physics      0.182 0.345 0.966 0.925  0.057      0.061
+tree         0.201 0.517 0.931 0.963  0.016      0.001
+linear       0.225 0.411 0.956 0.902  0.009      0.001
+time_of_week 0.391 1.040 0.705 0.916  0.003      0.024
+
+Blocked leave-one-week-out CV (pooled out-of-fold):
+room          synthetic_0  synthetic_1  synthetic_2  synthetic_3
+model                                                           
+forest              0.169        0.074        0.284        0.121
+forest+phys         0.128        0.039        0.263        0.076
+linear              0.283        0.143        0.488        0.191
+mlp                 0.163        0.092        0.282        0.125
+mlp+phys            0.140        0.076        0.274        0.097
+physics             0.239        0.100        0.715        0.130
+svr                 0.186        0.102        0.352        0.144
+time_of_week        0.487        0.256        1.316        0.343
+tree                0.217        0.093        0.339        0.158
+room          synthetic_0  synthetic_1  synthetic_2  synthetic_3
+model                                                           
+forest              0.953        0.962        0.975        0.950
+forest+phys         0.973        0.983        0.979        0.974
+linear              0.948        0.949        0.968        0.945
+mlp                 0.968        0.964        0.980        0.962
+mlp+phys            0.975        0.977        0.982        0.974
+physics             0.962        0.970        0.939        0.967
+svr                 0.954        0.953        0.958        0.939
+time_of_week        0.676        0.692        0.548        0.669
+tree                0.930        0.932        0.965        0.918
+       room    V_m3  Q_m3s   ACH  C_out_ppm
+synthetic_0 159.660  0.122 2.761    419.414
+synthetic_1  70.301  0.033 1.700    419.678
+synthetic_2 415.832  0.424 3.669    418.694
+synthetic_3  96.957  0.037 1.385    419.685
+profile written to /home/user/mma3001_project/reports/results/profile_pipeline.txt
+.venv/bin/python scripts/make_figures.py
+wrote reports/figures/real_audit_timeline.png
+wrote reports/figures/real_association.png
+wrote reports/figures/real_cv_bars.png
+chosen teaching week: fold 0 2024-05-01..2024-05-07 var=15.90
+wrote reports/figures/real_cv_week.png
+wrote reports/figures/real_scatter.png
+wrote reports/figures/real_chrono_regime.png
+wrote reports/results/real/resample_holdout.csv
+wrote reports/figures/real_resample_holdout.png
+.venv/bin/python -m pytest -q --html=reports/test_report.html --self-contained-html \
+    --junitxml=reports/test_results.xml
+...........................                                              [100%]
+- Generated html report: file:///home/user/mma3001_project/reports/test_report.html -
+27 passed in 1.47s
+.venv/bin/python -m pdoc -d google --math -o docs occupancy

@@ -17,7 +17,7 @@ date: "October 2026"
 
 **Intended use.** Use the estimates for zone-level ventilation scheduling and utilisation reporting (15-min resolution, errors of ±1–2 people acceptable). They are *not* meant for safety-critical counting such as fire-egress limits.
 
-**Scope and its limits.** The project compares a physics-based estimator (single-zone CO₂ mass balance), a schedule baseline, and five ML regressors, plus physics/ML hybrids. It does not do online control. Section 2 explains that the usable real data reduced to **one co-located sensor/space pair** (27 days) plus two control pairs. Conclusions about generalisation to other rooms are therefore limited (Section 7).
+**Scope and its limits.** The project compares a physics-based estimator (single-zone CO₂ mass balance), a schedule baseline, and five ML regressors, plus physics/ML hybrids. It does not do online control. Section 2 explains that the usable real data reduced to **one co-located sensor/space pair** (25 days) plus two control pairs. Conclusions about generalisation to other rooms are therefore limited (Section 7).
 
 # 2. Inputs, outputs and data
 
@@ -56,7 +56,7 @@ The teaching team provided two exports: environmental sensors (179 447 rows, JSO
 
 **Associating sensors with spaces from data.** The metadata could not be trusted, so I correlated each live sensor's CO₂ with each space's headcount on the common 15-min grid. Both series first had their own *time-of-week mean* removed. Without this step, any two series that are high during office hours would correlate.
 
-Sensor `…0869` and space `3e5a14df` had a residual correlation of r = 0.64 over 27 days, far above every other pair (Fig. 2). This pair is taken as **co-located (primary)**. Two weaker pairs (r = 0.40, 0.32) are kept as **controls**. Sensor `…0326` correlates with nothing (|r| ≤ 0.03).
+Sensor `…0869` and space `3e5a14df` had a residual correlation of r = 0.65 over 25 days of labelled data, far above every other pair (Fig. 2). This pair is taken as **co-located (primary)**. Two weaker pairs (r = 0.41, 0.33) are kept as **controls**. Sensor `…0326` correlates with nothing (|r| ≤ 0.03).
 
 ![Residual (time-of-week-removed) correlation between live env sensors and occupancy spaces.](figures/real_association.png){width=70%}
 
@@ -102,7 +102,7 @@ Here $g=5.2\times10^{-6}$ m³/s per person is the CO₂ generation of a sedentar
 
 ## 3.3 Data-driven and hybrid models
 
-All models are scikit-learn regressors on **causal** features, so they could run in real time:
+All models are scikit-learn regressors on **near-causal** features (current and past grid values only; the linear interpolation onto the grid looks at most one raw sample, about 10 min, ahead), so they could run in near real time:
 
 - CO₂ and its first difference at lags 0–3;
 - CO₂ above a rolling 24-h 5th-percentile baseline;
@@ -137,7 +137,9 @@ All models are scikit-learn regressors on **causal** features, so they could run
 - RMSE;
 - R²;
 - bias;
-- F1 for the occupied/vacant state.
+- **balanced accuracy** for the occupied/vacant state (> 0.5 persons).
+
+F1 and plain accuracy are *not* used as evidence of skill. 77 % of labelled intervals are occupied, so a constant "occupied" prediction already scores F1 = 0.87. Balanced accuracy gives 0.5 for any constant prediction. All models are scored on the common set of intervals where every model has a prediction.
 
 The validation folds did not influence the headline model settings. The defaults were fixed beforehand, and tuning is reported only as sensitivity (§6.2) to avoid optimistic selection bias.
 
@@ -151,27 +153,29 @@ Verification uses manufactured data where the truth is known exactly (`tests/`, 
 - **End-to-end on synthetic rooms.** Four rooms were generated with irregular ~10-min sampling, 15 ppm noise and 3 % dropouts. Physics R² was 0.96, and the calibrated V and Q were within 4–17 % and 5 % of truth respectively.
 - **Vectorisation.** The vectorised solver matches the loop to 1e-10.
 
-All 23 unit tests pass (`reports/test_report.html`).
+All 27 unit tests pass (`reports/test_report.html`).
 
 ![Convergence of explicit Euler and RK4 against the exact solution (observed orders 0.97 and 4.14). The stability demonstration is in Appendix A (Fig. A0).](figures/fig_convergence.png){width=55%}
 
 # 5. Validation on real data
 
-## 5.1 Main result (blocked CV, primary pair, 7 folds, 2 615 intervals)
+## 5.1 Main result (blocked CV, primary pair, 7 folds, 2 414 intervals)
 
-| Model | MAE [persons] | RMSE | R² | Bias | F1 (occupied) | Fit time per fold |
+| Model | MAE [persons] | RMSE | R² | Bias | Balanced acc. (occupied) | Fit time per fold |
 |---|---|---|---|---|---|---|
-| Time-of-week baseline | 2.17 | 3.07 | 0.00 | +0.01 | 0.85 | 1 ms |
-| **Physics (3 parameters)** | 1.55 | 2.24 | 0.47 | **+0.02** | 0.82 | **2 ms** |
-| Linear (ridge) | 1.58 | 2.25 | 0.46 | +0.17 | 0.86 | 3 ms |
-| SVR | 1.61 | 2.35 | 0.41 | +0.01 | 0.83 | 0.27 s |
-| MLP 64-32 | 1.61 | 2.35 | 0.41 | +0.27 | 0.83 | 0.77 s |
-| **Random forest** | **1.43** | **2.12** | **0.52** | +0.10 | **0.87** | 0.60 s |
-| Forest + physics feature | 1.43 | 2.14 | 0.51 | +0.11 | 0.87 | 0.55 s |
+| Time-of-week baseline | 2.35 | 3.21 | −0.05 | +0.09 | 0.52 | 2 ms |
+| **Physics (3 parameters)** | 1.60 | 2.29 | 0.47 | **+0.03** | 0.56 | **2 ms** |
+| Linear (ridge) | 1.63 | 2.32 | 0.45 | +0.17 | **0.65** | 3 ms |
+| SVR | 1.68 | 2.42 | 0.40 | −0.01 | 0.61 | 0.23 s |
+| MLP 64-32 | 1.71 | 2.50 | 0.37 | +0.16 | 0.57 | 0.69 s |
+| **Random forest** | **1.50** | **2.19** | **0.51** | +0.09 | 0.55 | 0.56 s |
+| Forest + physics feature | 1.50 | 2.20 | 0.51 | +0.09 | 0.56 | 0.55 s |
 
-**The sensor carries real information.** Every sensor-based model beats the schedule baseline. MAE falls by 0.56–0.75 persons (−26 % to −34 %), and R² rises from 0 to 0.41–0.52. On the two *control* pairs (sensor not co-located), the same forest reaches only R² = 0.27/0.41, against 0.15/0.27 for the baseline (Fig. 4). The gain is far smaller, which supports the claim that the primary pair measures room-level occupancy rather than building-wide activity.
+**The sensor carries real information.** Every sensor-based model beats the schedule baseline. MAE falls by 0.64–0.84 persons (−27 % to −36 %), and R² rises from −0.05 to 0.37–0.51. On the two *control* pairs (sensor not co-located), the same forest reaches only R² = 0.27/0.40, against 0.15/0.26 for the baseline (Fig. 4). The gain is far smaller, which supports the claim that the primary pair measures room-level occupancy rather than building-wide activity.
 
-**Physics versus black box.** The 3-parameter physics model is within 0.13 persons MAE of the best model. It has the smallest bias, and it fits 300× faster than the forest. The MLP is not better than linear regression on 2 600 samples of tabular data. Adding the physics estimate as a forest feature changed nothing, unlike on synthetic data, where it helped (MAE 0.15 → 0.10). On real data the forest already extracts the same CO₂-level information.
+**Physics versus black box.** The 3-parameter physics model is within 0.09 persons MAE of the best model. It has the smallest bias, and it fits 300× faster than the forest. The MLP is not better than linear regression on 2 600 samples of tabular data. Adding the physics estimate as a forest feature changed nothing, unlike on synthetic data, where it helped (MAE 0.15 → 0.10). On real data the forest already extracts the same CO₂-level information.
+
+**Vacancy detection is weak.** Balanced accuracy for occupied/vacant is only 0.52–0.65 (linear regression is best). The models estimate *how many* people are present far better than *whether anyone* is. After people leave, CO₂ decays over tens of minutes, so recently vacated intervals still look occupied. A virtual sensor of this kind should not be used for vacancy-triggered set-backs without a hysteresis or time-out rule.
 
 **Failure mode.** All models **under-predict peaks above ~10 people** (Fig. 5). The CO₂ at a sensor mounted high in a large workshop zone rises only 100–150 ppm for 15 occupants, because the effective volume is large. Accuracy at high occupancy is therefore limited by physics, not by the model class.
 
@@ -181,14 +185,17 @@ All 23 unit tests pass (`reports/test_report.html`).
 
 ## 5.2 What the validation cannot establish
 
-- **Single site.** There is only one co-located pair, with 27 days in one season. Accuracy in other rooms, other ventilation regimes (e.g. winter heating), or with occupancy far outside 0–17 is untested.
+- **Single site.** There is only one co-located pair, with 25 days in one season. Accuracy in other rooms, other ventilation regimes (e.g. winter heating), or with occupancy far outside 0–17 is untested.
 - **Uncertain pairing.** The co-location is *inferred* statistically, not confirmed physically.
 - **Imperfect ground truth.** The counter itself is not error-free. Its own error is unknown and is included in the reported MAE.
-- **Overlapping folds.** CV folds share the same 6-week period, so the result is not a test of long-term drift.
+- **Overlapping folds.** CV folds share the same 6-week period, so the result is not a test of long-term drift. Leave-one-week-out also trains on *later* weeks, which is optimistic compared with forward deployment (§5.3 covers the forward case).
+- **Selection optimism.** The primary pair was selected as the best of 10 sensor–space pairs, using correlation over the same labels that CV later scores. The primary-pair R² is therefore optimistically biased. The controls only partly offset this; selecting on an independent period would be the rigorous fix.
+- **Label availability is not uniform.** Counter silences longer than 30 min are treated as missing, not as zero. Night-time label coverage is only 17–33 %, against 80–93 % by day, so the scored intervals over-represent busy periods.
+- **Coverage floor.** A 15-min interval is scored only if at least 50 % of its minutes have counter data.
 
 ## 5.3 Regime shift (chronological split)
 
-When trained on May (teaching) and tested on 6–13 June (exams), the schedule baseline fails badly: MAE 2.12, because it predicts teaching-week occupancy. The CO₂-based models adapt (forest MAE 0.61, physics 0.82; Fig. 6). This is the practical argument for a sensor-based estimate over a timetable. A timetable cannot know that the semester has ended.
+When trained on May (teaching) and tested on 6–13 June (exams), the schedule baseline fails badly: MAE 2.42, because it predicts teaching-week occupancy. The CO₂-based models adapt (forest MAE 0.65, physics 0.85; Fig. 6). This is the practical argument for a sensor-based estimate over a timetable. A timetable cannot know that the semester has ended.
 
 ![Daily mean occupancy over the paired period; the shaded chronological test window falls in the exam period.](figures/real_chrono_regime.png){width=68%}
 
@@ -198,12 +205,12 @@ When trained on May (teaching) and tested on 6–13 June (exams), the schedule b
 
 **Derivative scheme and grid spacing (Fig. 7a).**
 
-- Prediction accuracy is almost insensitive to the derivative scheme (CV R² 0.44–0.48 across backward, central and Savitzky–Golay) and improves slightly at a 30-min grid.
+- Prediction accuracy is almost insensitive to the derivative scheme (CV R² 0.45–0.49 across backward, central and Savitzky–Golay) and improves slightly at a 30-min grid.
 - The backward-difference result at 15 min looks best, but is scored on only 5 of 7 folds; the other two calibrations were non-physical.
 
-**Parameter identifiability.** The *identified* volume is not robust. V ranges from 25 to 670 m³ across schemes, whereas Q stays at ≈ 0.25 m³/s (≈ 250 L/s). The estimate is dominated by the steady-state term $Q(C-C_\text{out})$. With 10-min sampling and transients shorter than τ, the derivative term is poorly identified. Engineering consequence: the calibrated Q is a credible ventilation estimate, but V should not be read as a physical room volume.
+**Parameter identifiability.** The *identified* volume is not robust. V ranges from 23 to 545 m³ across schemes, whereas Q stays at ≈ 0.25 m³/s (≈ 250 L/s). The estimate is dominated by the steady-state term $Q(C-C_\text{out})$. With 10-min sampling and transients shorter than τ, the derivative term is poorly identified. Engineering consequence: the calibrated Q is a credible ventilation estimate, but V should not be read as a physical room volume.
 
-**Generation rate g.** Predictions are exactly invariant to the assumed g; they differed by at most 4e-15 for g = 3.5–7.0 × 10⁻⁶ m³/s. Only the inferred V and Q scale with g. An uncertain metabolic rate therefore does not affect the occupancy estimate when the model is calibrated against counts.
+**Generation rate g.** It follows algebraically from the linear calibration that predictions are invariant to the assumed g; numerically, they were identical to machine precision for g = 3.5–7.0 × 10⁻⁶ m³/s. Only the inferred V and Q scale with g. An uncertain metabolic rate therefore does not affect the occupancy estimate when the model is calibrated against counts.
 
 **Synthetic sensitivity.**
 
@@ -214,15 +221,15 @@ When trained on May (teaching) and tested on 6–13 June (exams), the schedule b
 
 **Hyper-parameter sweep.**
 
-- Forest depth 4–∞ and leaf size 5–50: R² 0.515–0.543.
-- MLP width 16–64-32 and L2 1e-4–1: R² 0.39–0.41.
+- Forest depth 4–∞ and leaf size 5–50: R² 0.504–0.536.
+- MLP width 16–64-32 and L2 1e-4–1: R² 0.34–0.40.
 
 The best forest is only 0.02 above the default, and it was selected on the same folds, so the defaults were kept.
 
 **Learning curve (Fig. 7b).** Each fold's training set was subsampled to *n* labelled days.
 
-- The physics model reaches R² = 0.44 ± 0.09 with **4 days** of labels.
-- The forest needs about 14 days to reach a similar level (0.12 at 4 days, 0.42 at 14).
+- The physics model reaches R² = 0.45 ± 0.09 with **4 days** of labels.
+- The forest needs about 14 days to reach a similar level (0.11 at 4 days, 0.41 at 14).
 
 For commissioning a new room, the physics model's data efficiency matters more than the forest's final 0.05 R².
 
@@ -240,19 +247,19 @@ For commissioning a new room, the physics model's data efficiency matters more t
 | Method | FLOP / sample | Bytes / sample | Arithmetic intensity | Measured time (n = 10⁶) |
 |---|---|---|---|---|
 | RK4 step (Python loop) | 32 | 24 | 1.3 | 2 000 ns |
-| Exact step, Python loop | 6 | 24 | 0.25 | 270 ns |
+| Exact step, Python loop | 6 | 24 | 0.25 | 295 ns |
 | **Exact step, `lfilter`** | 6 | 24 | 0.25 | **7.5 ns** |
-| Inverse estimator (central) | 8 | 16 | 0.5 | 8.5 ns |
-| Inverse estimator (Sav.–Golay) | 15 | 16 | 0.9 | 18 ns |
+| Inverse estimator (central) | 8 | 16 | 0.5 | 8.3 ns |
+| Inverse estimator (Sav.–Golay) | 15 | 16 | 0.9 | 21 ns |
 | MLP inference (24-64-32-1) | 7 300 | 200 | 37 | — |
 
-**Physics estimator.** Its intensity (0.5–0.9 FLOP/B) is far below machine balance, so it is **memory-bound**. The roofline bound is about 2 ns/sample (16 B ÷ 8.4 GB/s). The measured 8.5 ns reflects NumPy temporaries, i.e. several passes over memory.
+**Physics estimator.** Its intensity (0.5–0.9 FLOP/B) is far below machine balance, so it is **memory-bound**. The roofline bound is about 2 ns/sample (16 B ÷ 8.4 GB/s). The measured 8.3 ns reflects NumPy temporaries, i.e. several passes over memory.
 
 **MLP.** It is compute-bound when batched. It needs ~500× more FLOP per estimate than the physics model.
 
 **Optimisation results.**
 
-- Replacing the Python time-stepping loop with the IIR-filter form of the exact solution gave a **36× speed-up** over the exact loop, and 280× over the RK4 loop, with identical results (Fig. A1).
+- Replacing the Python time-stepping loop with the IIR-filter form of the exact solution gave a **40× speed-up** over the exact loop, and about 260× over the RK4 loop, with identical results (Fig. A1).
 - Vectorising the occupancy aggregation turned a per-event Python loop into a cumulative-sum evaluation (0.1–0.4 s per 2 M events).
 - Profiling with cProfile shows that the full experiment time is dominated by SVR and random-forest fitting inside CV, not by the numerical methods.
 
@@ -262,7 +269,7 @@ At building scale (hundreds of zones at 15-min resolution), every method is comp
 
 **Limitations.**
 
-1. **Narrow evidence base.** Real-data evidence rests on one inferred co-located pair over 27 days. This is the largest threat to external validity.
+1. **Narrow evidence base.** Real-data evidence rests on one inferred co-located pair over 25 days. This is the largest threat to external validity.
 2. **Single-zone assumption.** The model assumes one well-mixed zone. A sensor mounted high in a large workshop sees a diluted, delayed signal, which is why every model under-predicts peaks.
 3. **Latency.** The Savitzky–Golay derivative adds 30 min of latency.
 4. **No uncertainty estimate.** No prediction intervals are produced, even though DCV control should use them.
@@ -270,7 +277,7 @@ At building scale (hundreds of zones at 15-min resolution), every method is comp
 **Lessons.**
 
 1. **Data auditing changed the project.** 76 % of env rows were duplicates, and the metadata was wrong. The physical pairing of sensor and space had to be inferred from data, with controls to test that inference.
-2. **Evaluation design mattered more than model choice.** A naive chronological split produced R² of −20 for the baseline and negative values for every model. The cause was an exam-period test window, not bad models. Blocked CV gave a fair picture.
+2. **Evaluation design mattered more than model choice.** A naive chronological split produced R² of −23 for the baseline and negative values for every model. The cause was an exam-period test window, not bad models. Blocked CV gave a fair picture.
 3. **A small timing detail produced a large parameter bias.** Labelling the interval mean at its start biased V by +40 %; centring fixed it. Synthetic verification exposed the bug before real data could hide it.
 4. **Simple models are hard to beat.** A 3-parameter physics model with one least-squares solve matched an MLP. It needs a quarter of the training data, and its parameter Q has engineering meaning.
 
@@ -295,11 +302,17 @@ The student set the goal and constraints, selected the dataset, supplied the dat
 # References
 
 [1] ASHRAE, *Standard 62.1-2022: Ventilation and Acceptable Indoor Air Quality*, Atlanta, 2022.
+
 [2] A. Persily and L. de Jonge, "Carbon dioxide generation rates for building occupants," *Indoor Air*, 27(5), 868–879, 2017.
+
 [3] Monash Smart Infrastructure, *MSI occupancy and environmental sensor exports (May–Dec 2024)*, provided for MMA3001, Monash University, 2026.
+
 [4] P. Virtanen et al., "SciPy 1.0," *Nature Methods*, 17, 261–272, 2020.
+
 [5] F. Pedregosa et al., "Scikit-learn: Machine learning in Python," *JMLR*, 12, 2825–2830, 2011.
+
 [6] A. Savitzky and M. J. E. Golay, "Smoothing and differentiation of data by simplified least squares procedures," *Analytical Chemistry*, 36(8), 1627–1639, 1964.
+
 [7] MMA3001 unit notes, weeks 2–11 (optimisation and profiling, interpolation, ML regression, finite differences, ODE stability), Monash University, 2026.
 
 # Appendix A — additional figures

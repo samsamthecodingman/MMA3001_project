@@ -37,7 +37,7 @@ as it is done responsibly"), and it is disclosed here in full.
 
 These checks are part of the repository, so they can be re-run:
 
-- **Verification against known truth.** Convergence orders (Euler 0.97, RK4 4.14) were checked against theory. Calibration recovers V, Q and C_out from manufactured data. The vectorised solvers and aggregation were checked against loop references (`tests/`, 23 tests).
+- **Verification against known truth.** Convergence orders (Euler 0.97, RK4 4.14) were checked against theory. Calibration recovers V, Q and C_out from manufactured data. The vectorised solvers and aggregation were checked against loop references (`tests/`, 27 tests).
 - **Hand-calculated test case** for the headcount aggregation (`tests/test_io.py`).
 - **Independent review.** A separate AI reviewer agent audited the code for leakage and numerical bugs; its findings are listed in §5.
 - **Plausibility checks.** Physical parameter ranges, controls in the validation, and a baseline that any sensor model must beat.
@@ -54,7 +54,8 @@ The AI's own first attempts contained these errors. All were caught by tests or 
 5. **Train/test split over the wrong span.** The first real-data run split over the full CO2 record, not the span with labels, so training periods had no labels and every R² was negative. Fixed by trimming to the paired span.
 6. **Inappropriate validation design.** A purely chronological test week fell in the exam period. The AI initially reported the negative R² values before diagnosing the regime shift and adding blocked CV.
 7. **Library API change.** A sub-agent called `MLPRegressor(hidden, ...)` positionally, but newer scikit-learn changed the first argument to `loss`, so the call failed.
-8. **Unverified metadata.** The provided location sheet was wrong or incomplete. The AI did not trust it, and inferred the sensor–space pairing statistically with controls instead.
+8. **Misleading metric.** The first report presented F1 = 0.87 as evidence of skill. The independent AI reviewer showed that a constant "occupied" prediction scores the same, so balanced accuracy replaced it. The same review also flagged pair-selection optimism and uneven label coverage, both now stated as limitations.
+9. **Unverified metadata.** The provided location sheet was wrong or incomplete. The AI did not trust it, and inferred the sensor–space pairing statistically with controls instead.
 
 **[YOU: add any errors you noticed when reviewing, or suggestions you rejected.]**
 
@@ -62,7 +63,7 @@ The AI's own first attempts contained these errors. All were caught by tests or 
 
 - Final choice of problem framing and acceptance of the inferred sensor–space pairing.
 - Every claim in the report and every number presented in the interview.
-- Whether the limitations (single pair, 27 days, inferred co-location) are acceptable for the stated use.
+- Whether the limitations (single pair, 25 days, inferred co-location) are acceptable for the stated use.
 - **[YOU]**
 
 ## 7. Effect on understanding and workflow — **[YOU]**

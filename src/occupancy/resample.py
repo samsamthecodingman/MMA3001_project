@@ -64,7 +64,12 @@ def to_uniform(
     s = s[~s.index.duplicated()].sort_index()
     if len(s) < 2:
         raise ValueError("need at least two valid observations")
-    grid = pd.date_range(s.index[0].ceil(freq), s.index[-1].floor(freq), freq=freq)
+    # round in UTC: rounding a local time can land in a DST gap/overlap
+    tz = s.index.tz
+    i0, i1 = (s.index[[0, -1]].tz_convert("UTC") if tz is not None else s.index[[0, -1]])
+    grid = pd.date_range(i0.ceil(freq), i1.floor(freq), freq=freq)
+    if tz is not None:
+        grid = grid.tz_convert(tz)
     x = unix_seconds(s.index)
     xq = unix_seconds(grid)
     yq = _interp(x, s.to_numpy(float), xq, method)
