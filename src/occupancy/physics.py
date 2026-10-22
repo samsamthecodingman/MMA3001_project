@@ -185,8 +185,21 @@ def derivative(C: np.ndarray, dt: float, scheme: str = "central", window: int = 
     if scheme == "savgol":
         if window % 2 == 0 or window < 3:
             raise ValueError("savgol window must be odd and >= 3")
-        return savgol_filter(C, window, polyorder=2, deriv=1, delta=dt, mode="interp")
+        # filter each contiguous run of finite samples separately so gaps
+        # (NaN) don't contaminate their neighbours; short runs stay NaN
+        d = np.full_like(C, np.nan)
+        for s, e in _finite_runs(C):
+            if e - s >= window:
+                d[s:e] = savgol_filter(C[s:e], window, polyorder=2, deriv=1, delta=dt, mode="interp")
+        return d
     raise ValueError(f"unknown scheme {scheme!r}")
+
+
+def _finite_runs(x: np.ndarray) -> list[tuple[int, int]]:
+    """Start/end (exclusive) indices of contiguous finite runs in ``x``."""
+    f = np.concatenate([[False], np.isfinite(x), [False]])
+    edges = np.flatnonzero(np.diff(f.astype(int)))
+    return list(zip(edges[::2], edges[1::2]))
 
 
 def estimate_occupancy(
