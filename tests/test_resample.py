@@ -18,7 +18,7 @@ def irregular(n=500, seed=0):
 def test_uniform_grid_and_accuracy(method):
     s, _ = irregular()
     u = to_uniform(s, "15min", method, max_gap="3h")
-    assert (np.diff(u.index.asi8) == 15 * 60 * 1e9).all()
+    assert (np.diff(u.index) == pd.Timedelta("15min")).all()
     t = (u.index - pd.Timestamp("2024-05-06")).total_seconds().to_numpy()
     truth = 600 + 200 * np.sin(2 * np.pi * t / 86400)
     tol = 25 if method == "nearest" else 2

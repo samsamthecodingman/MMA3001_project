@@ -66,9 +66,9 @@ from occupancy.physics import (  # noqa: E402
 from occupancy.pipeline import prepare_room  # noqa: E402
 from occupancy.synthetic import make_room  # noqa: E402
 
-# src/occupancy/synthetic.py uses Timestamp.dayofweek, deprecated in pandas 3/4
+# src/occupancy/synthetic.py uses Timestamp.day_of_week, deprecated in pandas 3/4
 # (harmless, reported separately); silence only that message.
-warnings.filterwarnings("ignore", message="Timestamp.dayofweek is deprecated")
+warnings.filterwarnings("ignore", message="Timestamp.day_of_week is deprecated")
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 FIG_DIR = ROOT / "reports" / "figures"

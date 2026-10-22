@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 from scipy.interpolate import CubicSpline, PchipInterpolator
 
+from .timeutil import unix_seconds
+
 METHODS = ("linear", "pchip", "cubic", "nearest")
 
 
@@ -58,8 +60,8 @@ def to_uniform(
     if len(s) < 2:
         raise ValueError("need at least two valid observations")
     grid = pd.date_range(s.index[0].ceil(freq), s.index[-1].floor(freq), freq=freq)
-    x = s.index.asi8 / 1e9
-    xq = grid.asi8 / 1e9
+    x = unix_seconds(s.index)
+    xq = unix_seconds(grid)
     yq = _interp(x, s.to_numpy(float), xq, method)
     # mask grid points inside gaps longer than max_gap
     j = np.searchsorted(x, xq)
@@ -87,7 +89,7 @@ def holdout_error(
     rng = np.random.default_rng(seed)
     hold = rng.random(len(s)) < frac
     hold[[0, -1]] = False  # keep end points so there is no extrapolation
-    x = s.index.asi8 / 1e9
+    x = unix_seconds(s.index)
     y = s.to_numpy(float)
     pred = _interp(x[~hold], y[~hold], x[hold], method)
     err = pred - y[hold]

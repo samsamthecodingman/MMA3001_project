@@ -1,0 +1,26 @@
+env_rows: 179447
+env_sensors: 5
+env_time_range: 2023-05-06 08:42:45+10:00 .. 2026-04-22 23:12:41+10:00
+env_duplicates: 136604
+env_flagged: {'co2_ppm': 0, 'temp_c': 0, 'rh_pct': 0, 'pressure_mb': 0}
+frozen_sensors: ['6012002000227', '6012002000241', '6012002000777']
+occ_spaces: 5
+room_tables: 3
+env_load_s: 0.22341100399989955
+occ_load_s: 17.944003621999855
+aggregate_0f3f37f8_s: 0.26476066999975956
+aggregate_227f1068_s: 0.21987954399992304
+aggregate_3e5a14df_s: 0.12709152599973095
+aggregate_941f0352_s: 0.2631585589997485
+aggregate_cca1ac3e_s: 0.4044763179999791
+     sensorid                         floorspaceid space_room  overlap_days      r  r_resid    role
+6012002000869 3e5a14df-4b14-4ea5-bb9d-46577c6dc9c8    unknown        27.240  0.696    0.641 primary
+6012002000869 941f0352-bb69-47d0-a9c5-ac29eb4f7319    unknown        65.562  0.531    0.404 control
+6012002000869 0f3f37f8-0335-41e0-ae87-a1d677dfc7d7    unknown        77.229  0.454    0.322 control
+6012002000869 227f1068-9e41-469f-bef0-275f27a0bdba    60-G.25        72.875  0.417    0.262  unused
+6012002000869 cca1ac3e-f81f-4ebb-aa2b-8b0bf3e9e53b    60-G.20        50.781  0.263    0.164  unused
+6012002000326 0f3f37f8-0335-41e0-ae87-a1d677dfc7d7    unknown        99.198 -0.130    0.017  unused
+6012002000326 941f0352-bb69-47d0-a9c5-ac29eb4f7319    unknown       109.417 -0.180    0.007  unused
+6012002000326 cca1ac3e-f81f-4ebb-aa2b-8b0bf3e9e53b    60-G.20        89.073 -0.078   -0.006  unused
+6012002000326 227f1068-9e41-469f-bef0-275f27a0bdba    60-G.25       156.083 -0.133   -0.023  unused
+6012002000326 3e5a14df-4b14-4ea5-bb9d-46577c6dc9c8    unknown         0.000    NaN      NaN  unused

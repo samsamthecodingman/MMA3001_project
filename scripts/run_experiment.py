@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 
 from occupancy.physics import RoomParams
-from occupancy.pipeline import prepare_room, run_room
+from occupancy.pipeline import prepare_room, run_room, run_room_cv
 from occupancy.synthetic import make_room
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -49,11 +49,14 @@ def main() -> None:
     out = ROOT / "reports" / "results" / tag
     out.mkdir(parents=True, exist_ok=True)
     dt = pd.Timedelta(args.freq).total_seconds()
-    all_scores, all_preds, params = [], [], []
+    all_scores, all_preds, params, cv_scores, cv_oof = [], [], [], [], []
     for name, table in rooms.items():
         print(f"room {name}: {len(table)} rows, occupancy coverage "
               f"{table['occupancy'].notna().mean():.0%}")
         scores, extra = run_room(table, dt)
+        cvs, oof = run_room_cv(table, dt)
+        cv_scores.append(cvs.assign(room=name))
+        cv_oof.append(oof.assign(room=name))
         all_scores.append(scores.assign(room=name))
         p = extra["preds"]
         all_preds.append(pd.DataFrame(p).assign(y_true=extra["y_test"], room=name))
@@ -69,6 +72,13 @@ def main() -> None:
     summary.to_csv(out / "summary_median.csv")
     with pd.option_context("display.float_format", "{:.3f}".format):
         print(summary)
+    cv = pd.concat(cv_scores)
+    cv.to_csv(out / "cv_scores_by_room.csv")
+    pd.concat(cv_oof).to_parquet(out / "cv_oof_predictions.parquet")
+    print("\nBlocked leave-one-week-out CV (pooled out-of-fold):")
+    with pd.option_context("display.float_format", "{:.3f}".format, "display.width", 200):
+        print(cv.reset_index().pivot(index="model", columns="room", values="mae"))
+        print(cv.reset_index().pivot(index="model", columns="room", values="r2"))
     if params:
         print(pd.DataFrame(params).round(3).to_string(index=False))
 

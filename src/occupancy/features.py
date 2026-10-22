@@ -50,5 +50,5 @@ def build_features(df: pd.DataFrame, lags: int = 3, causal: bool = True) -> pd.D
     h = df.index.hour + df.index.minute / 60
     X["hour_sin"] = np.sin(2 * np.pi * h / 24)
     X["hour_cos"] = np.cos(2 * np.pi * h / 24)
-    X["weekend"] = (df.index.dayofweek >= 5).astype(float)
+    X["weekend"] = (df.index.day_of_week >= 5).astype(float)
     return X
