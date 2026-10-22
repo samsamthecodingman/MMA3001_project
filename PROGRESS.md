@@ -9,11 +9,16 @@ resume after interruptions). Plan: see "Execution order" below.
 - [x] `scripts/sensitivity_synthetic.py` (convergence, Euler stability, dt/scheme/noise sweeps, target alignment)
 - [x] `scripts/profile_performance.py` (scaling, FLOPs, arithmetic intensity, cProfile)
 - [x] Real data downloaded from GitHub release `data-v1` → `data/raw/` (not committed)
-- [ ] Ingest real data: env JSON → wide table; occ events → per-space headcount; audit; room matching
-- [ ] Real-data experiment + leave-one-room-out + figures
-- [ ] Fix: centre occupancy target on the CO2 sample time (alignment finding)
-- [ ] Docs: README, LICENSE, docstrings pass, pdoc HTML, pytest-html report
-- [ ] Report (≤10 pages) → PDF; DECISIONS.md; AI_USE.md; VIVA_PREP.md; notebook walkthrough
+- [x] Ingest real data, audit (3/5 env sensors frozen, 76 % duplicate rows), data-driven sensor/space association
+- [x] Real-data experiment: blocked leave-one-week-out CV (primary + 2 controls) + chronological regime-shift test + figures
+- [x] Centre occupancy target on the CO2 sample time (alignment finding)
+- [x] Real-data sensitivity: scheme × grid, g-invariance, hyper-parameters, learning curve
+- [x] Docs: README, LICENSE, Makefile, requirements, docstrings, pdoc HTML (docs/), pytest-html report
+- [x] Report → reports/report.pdf (body ends p.10); DECISIONS.md; AI_USE.md (draft — student must complete [YOU] parts); VIVA_PREP.md
+- [ ] Notebook walkthrough (in progress)
+- [ ] Independent code review → fixes
+- [ ] Clean `make all` reproducibility run
+- [ ] Presentation slides (nice to have)
 
 ## Data facts (from inspection)
 - Env CSV: one row per sensor report; columns id, sensorid, devicetype, jsondata (list of {values:[{time,value}], variable:{name,unit}}), status, ... Variables include CO2 (ppm), Humidity (HR%), Temperature (°C), Pressure (mb), Formaldehyde, LVOC, PM, Battery.
