@@ -24,6 +24,7 @@ def prepare_room(
     method: str = "linear",
     max_gap: str = "45min",
     center: bool = True,
+    min_occ_coverage: float = 0.5,
 ) -> pd.DataFrame:
     """Align irregular env readings and occupancy counts on one grid.
 
@@ -47,6 +48,9 @@ def prepare_room(
         max_gap: Longest gap bridged by interpolation.
         center: If True, centre the occupancy target on the grid time
             (see above); if False, label the interval mean at its start.
+        min_occ_coverage: Minimum fraction of the expected occupancy samples
+            (inferred from the median spacing of ``occ``) that an interval
+            must contain; otherwise its target is NaN.
 
     Returns:
         Room table (see module docstring); rows lacking CO2 or occupancy
@@ -59,7 +63,13 @@ def prepare_room(
     table = pd.DataFrame(cols)
     if center:
         occ = occ.shift(freq=pd.Timedelta(freq) / 2)
-    o = occ.resample(freq, label="left", closed="left").mean()
+    r = occ.resample(freq, label="left", closed="left")
+    o, n = r.mean(), r.count()
+    # require >= min_occ_coverage of the expected samples in each interval,
+    # so a bin with a single valid minute is not treated as an interval mean
+    step = occ.index.to_series().diff().median()
+    expected = pd.Timedelta(freq) / step if pd.notna(step) and step > pd.Timedelta(0) else 1
+    o = o.where(n >= min_occ_coverage * expected)
     table["occupancy"] = o.reindex(table.index)
     return table
 
@@ -159,9 +169,13 @@ def fit_predict(table: pd.DataFrame, dt: float, fit_mask: np.ndarray, test_mask:
 
 def _score(y_te: np.ndarray, preds: dict, timings: dict) -> pd.DataFrame:
     """Score each model's predictions and attach its fit/predict timings."""
+    # score every model on the same rows (where all models have a prediction)
+    common = np.isfinite(y_te)
+    for yhat in preds.values():
+        common &= np.isfinite(yhat)
     rows = []
     for name, yhat in preds.items():
-        m = metrics(y_te, yhat)
+        m = metrics(y_te[common], np.asarray(yhat)[common])
         m.update(model=name, fit_s=timings[name][0], predict_s=timings[name][1])
         rows.append(m)
     return pd.DataFrame(rows).set_index("model")

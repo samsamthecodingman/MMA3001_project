@@ -23,7 +23,7 @@ def metrics(y_true: np.ndarray, y_pred: np.ndarray, occ_threshold: float = 0.5) 
 
     Returns:
         Dict with ``mae``, ``rmse``, ``r2``, ``bias`` (mean error),
-        ``f1``/``accuracy`` for the occupied state, and ``n``. Pairs where
+        ``f1``/``accuracy``/``balanced_accuracy`` for the occupied state, and ``n``. Pairs where
         either value is not finite are ignored; ``r2`` is NaN if the truth
         is constant.
 
@@ -49,6 +49,10 @@ def metrics(y_true: np.ndarray, y_pred: np.ndarray, occ_threshold: float = 0.5) 
         "bias": float(np.mean(e)),
         "f1": float(2 * prec * rec / (prec + rec)) if prec + rec > 0 else 0.0,
         "accuracy": float(np.mean(yt == yp)),
+        # mean of the true-positive and true-negative rates: unlike F1 and
+        # accuracy it scores 0.5 for a constant prediction, so it shows skill
+        # even when most intervals are occupied
+        "balanced_accuracy": float(0.5 * (rec + np.sum(~yt & ~yp) / max((~yt).sum(), 1))),
         "n": int(y.size),
     }
 

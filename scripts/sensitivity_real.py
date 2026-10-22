@@ -82,7 +82,7 @@ def cv_ml(t: pd.DataFrame, model_factory, train_days: int | None = None, seed: i
     for fit, te in week_folds(t.index):
         fm = fit & ok & np.isfinite(y)
         if train_days is not None:
-            fm &= subsample_days(t.index, fit, train_days, rng)
+            fm &= subsample_days(t.index, fm, train_days, rng)
         if fm.sum() < 20:
             continue
         m = model_factory()
@@ -168,7 +168,7 @@ def main() -> None:
             y, c = t15["occupancy"].to_numpy(float), t15["co2_ppm"].to_numpy(float)
             oof = np.full(len(t15), np.nan)
             for fit, te in week_folds(t15.index):
-                fm = fit & subsample_days(t15.index, fit, nd, rng)
+                fm = fit & subsample_days(t15.index, fit & np.isfinite(y), nd, rng)
                 try:
                     ph = PhysicsEstimator(900.0).fit(np.where(fm, c, np.nan), np.where(fm, y, np.nan))
                     oof[te] = ph.predict(c)[te]

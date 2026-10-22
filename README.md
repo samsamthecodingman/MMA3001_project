@@ -10,21 +10,22 @@ of known truth.
 ## Key results
 
 **Real data, primary room** (sensor `6012002000869` paired with floor-space
-`3e5a14df`; 2615 15-min intervals, about 27 days). Pooled out-of-fold scores
+`3e5a14df`; 2414 15-min intervals, about 25 labelled days). Pooled out-of-fold scores
 from blocked leave-one-week-out cross-validation (7 folds, 1-day buffers),
 from `reports/results/real/cv_scores_by_room.csv`. MAE and RMSE in persons;
-F1 is for the occupied/vacant decision (occupied = more than 0.5 persons).
+balanced accuracy is for the occupied/vacant decision (occupied = more than 0.5
+persons; a constant guess scores 0.5).
 
-| Model | MAE | RMSE | R² | F1 |
+| Model | MAE | RMSE | R² | Balanced acc. |
 |---|---|---|---|---|
-| time_of_week (baseline, no sensor data) | 2.17 | 3.06 | -0.00 | 0.85 |
-| physics (mass balance) | 1.55 | 2.24 | 0.46 | 0.82 |
-| linear (ridge) | 1.58 | 2.25 | 0.46 | 0.86 |
-| forest | 1.43 | 2.12 | 0.52 | 0.87 |
-| mlp | 1.61 | 2.35 | 0.41 | 0.83 |
-| forest + physics | 1.43 | 2.14 | 0.51 | 0.87 |
+| time_of_week (baseline, no sensor data) | 2.35 | 3.21 | -0.05 | 0.52 |
+| physics (mass balance) | 1.60 | 2.29 | 0.47 | 0.56 |
+| linear (ridge) | 1.63 | 2.32 | 0.45 | 0.65 |
+| forest | 1.50 | 2.19 | 0.51 | 0.55 |
+| mlp | 1.71 | 2.50 | 0.37 | 0.57 |
+| forest + physics | 1.50 | 2.20 | 0.51 | 0.56 |
 
-Caveats: one primary room with a short overlap, and the sensor-to-space
+Caveats: one primary room with a short overlap, chosen as the best-correlated of 10 sensor/space pairs (so slightly optimistic), and the sensor-to-space
 association is inferred from the data (the location sheet's occupancy tab is
 flagged as incorrect), so the numbers are indicative only. Two other pairs
 with weaker association are scored as controls in the same CSV.
