@@ -45,6 +45,8 @@ def prepare_room(
         freq: Grid spacing.
         method: Interpolation method for env channels.
         max_gap: Longest gap bridged by interpolation.
+        center: If True, centre the occupancy target on the grid time
+            (see above); if False, label the interval mean at its start.
 
     Returns:
         Room table (see module docstring); rows lacking CO2 or occupancy
@@ -68,6 +70,13 @@ def trim_to_paired(table: pd.DataFrame) -> pd.DataFrame:
     The env and occupancy records only partly overlap; splitting over the
     full CO2 record would put training periods where no labels exist.
 
+    Args:
+        table: Room table with ``co2_ppm`` and ``occupancy`` columns.
+
+    Returns:
+        The slice of ``table`` from the first to the last row where both
+        CO2 and occupancy are present.
+
     Raises:
         ValueError: if there is less than one day of paired data.
     """
@@ -81,6 +90,16 @@ def trim_to_paired(table: pd.DataFrame) -> pd.DataFrame:
 def fit_predict(table: pd.DataFrame, dt: float, fit_mask: np.ndarray, test_mask: np.ndarray,
                 models=ML_MODELS, seed: int = 0) -> tuple[dict[str, np.ndarray], dict[str, tuple], object]:
     """Fit every estimator on ``fit_mask`` rows and predict ``test_mask`` rows.
+
+    Args:
+        table: Room table (see module docstring).
+        dt: Grid spacing [s].
+        fit_mask: Boolean mask of rows available for fitting.
+        test_mask: Boolean mask of rows to predict.
+        models: Names of the scikit-learn models to fit (see
+            :func:`~occupancy.models.make_ml_model`); the time-of-week
+            baseline and the physics model are always included.
+        seed: Random seed for stochastic models.
 
     Returns:
         ``(preds, timings, phys_params)``: predictions per model for the
@@ -139,6 +158,7 @@ def fit_predict(table: pd.DataFrame, dt: float, fit_mask: np.ndarray, test_mask:
 
 
 def _score(y_te: np.ndarray, preds: dict, timings: dict) -> pd.DataFrame:
+    """Score each model's predictions and attach its fit/predict timings."""
     rows = []
     for name, yhat in preds.items():
         m = metrics(y_te, yhat)
@@ -154,6 +174,12 @@ def run_room(table: pd.DataFrame, dt: float, models=ML_MODELS, seed: int = 0) ->
     Models are trained on train+val and scored once on the final test
     period. This tests extrapolation forward in time, including any
     change of operating regime (e.g. teaching -> exam period).
+
+    Args:
+        table: Room table (see module docstring).
+        dt: Grid spacing [s].
+        models: Names of the scikit-learn models to evaluate.
+        seed: Random seed for stochastic models.
 
     Returns:
         ``(scores, extra)``: scores DataFrame (one row per model) and a
@@ -179,6 +205,14 @@ def run_room_cv(table: pd.DataFrame, dt: float, block: str = "7D", gap: str = "1
     autocorrelation cannot leak across the boundary. Out-of-fold
     predictions are pooled and scored once, so every regime in the record
     (teaching weeks, breaks) appears in the test data.
+
+    Args:
+        table: Room table (see module docstring).
+        dt: Grid spacing [s].
+        block: Block length (pandas offset string).
+        gap: Buffer excluded from training on either side of a test block.
+        models: Names of the scikit-learn models to evaluate.
+        seed: Random seed for stochastic models.
 
     Returns:
         ``(scores, oof)``: pooled scores per model and the out-of-fold

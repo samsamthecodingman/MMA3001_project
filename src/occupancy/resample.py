@@ -16,6 +16,11 @@ METHODS = ("linear", "pchip", "cubic", "nearest")
 
 
 def _interp(x: np.ndarray, y: np.ndarray, xq: np.ndarray, method: str) -> np.ndarray:
+    """Interpolate ``(x, y)`` at ``xq`` with the named method (NaN outside the data for spline types).
+
+    Raises:
+        ValueError: for an unknown method.
+    """
     if method == "linear":
         return np.interp(xq, x, y)
     if method == "pchip":
@@ -80,6 +85,12 @@ def holdout_error(
     A fraction of the real observations is removed, the remainder is
     interpolated at the withheld times and compared to the truth. This
     validates the resampling step on real data without needing a model.
+
+    Args:
+        s: Series with a DatetimeIndex.
+        method: Interpolation method, as in :func:`to_uniform`.
+        frac: Fraction of observations to withhold.
+        seed: RNG seed for the choice of withheld points.
 
     Returns:
         Dict with ``mae``, ``rmse`` and ``max`` absolute error, and ``n``.

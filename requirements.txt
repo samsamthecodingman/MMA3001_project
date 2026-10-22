@@ -1,0 +1,12 @@
+# Pinned versions of the environment used for the reported results
+# (Python 3.13). Install with: pip install -r requirements.txt && pip install -e . --no-deps
+numpy==2.5.4
+pandas==3.1.0
+scipy==1.18.1
+scikit-learn==1.9.1
+matplotlib==3.11.2
+pyarrow==26.0.0
+openpyxl==3.1.5
+pytest==9.1.1
+pytest-html==4.2.0
+pdoc==16.0.0

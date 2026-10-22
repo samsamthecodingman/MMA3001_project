@@ -128,8 +128,15 @@ def load_occupancy(path: str | pathlib.Path) -> pd.DataFrame:
 def flag_invalid(env: pd.DataFrame) -> pd.DataFrame:
     """Replace physically implausible readings with NaN.
 
-    Ranges are in :data:`VALID_RANGES`. Returns a copy; the number of
-    values removed per column is stored in ``df.attrs["n_flagged"]``.
+    Ranges are in :data:`VALID_RANGES`. Columns not listed there are left
+    untouched.
+
+    Args:
+        env: Wide env table (e.g. from :func:`load_env`).
+
+    Returns:
+        A copy of ``env`` with out-of-range values set to NaN. The number
+        of values removed per column is stored in ``df.attrs["n_flagged"]``.
     """
     env = env.copy()
     counts = {}
@@ -217,7 +224,11 @@ def occupancy_on_grid(events: pd.DataFrame, freq: str = "15min", max_hold: str =
             covered by valid segments, else the result is NaN.
 
     Returns:
-        Series of mean headcount per interval, labelled by interval start.
+        Series of mean headcount per interval, labelled by interval start
+        (NaN where the interval is not sufficiently covered).
+
+    Raises:
+        ValueError: if fewer than two valid events are given.
     """
     e = events[["time", "headcount"]].dropna().sort_values("time")
     if len(e) < 2:

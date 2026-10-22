@@ -1,4 +1,9 @@
-"""Metrics and leakage-free time-series splitting."""
+"""Metrics and leakage-free time-series splitting.
+
+* :func:`metrics` -- MAE, RMSE, R^2, bias and occupied/vacant F1/accuracy.
+* :func:`chrono_split` -- chronological train/validation/test masks.
+* :func:`blocked_folds` -- expanding-window cross-validation folds.
+"""
 from __future__ import annotations
 
 from collections.abc import Iterator
@@ -18,7 +23,12 @@ def metrics(y_true: np.ndarray, y_pred: np.ndarray, occ_threshold: float = 0.5) 
 
     Returns:
         Dict with ``mae``, ``rmse``, ``r2``, ``bias`` (mean error),
-        ``f1``/``accuracy`` for the occupied state, and ``n``.
+        ``f1``/``accuracy`` for the occupied state, and ``n``. Pairs where
+        either value is not finite are ignored; ``r2`` is NaN if the truth
+        is constant.
+
+    Raises:
+        ValueError: if there are no valid (finite) pairs.
     """
     y = np.asarray(y_true, float)
     p = np.asarray(y_pred, float)
@@ -52,6 +62,13 @@ def chrono_split(
     sample's neighbours are in training). Splitting by time, with a gap
     so the lagged features never straddle a boundary, avoids this.
 
+    Args:
+        index: Timestamps of the samples.
+        train: Fraction of the time span used for training.
+        val: Fraction of the time span used for validation (following
+            training).
+        gap: Buffer removed after the training and validation periods.
+
     Returns:
         Boolean masks ``(train, val, test)`` aligned with ``index``.
     """
@@ -75,6 +92,12 @@ def blocked_folds(
 
     Fold k trains on the first k blocks and validates on block k+1,
     leaving ``gap`` between them.
+
+    Args:
+        index: Timestamps of the samples.
+        n_folds: Number of folds requested (folds with an empty training
+            or validation set are skipped).
+        gap: Buffer between the training and validation periods.
 
     Yields:
         ``(train_mask, val_mask)`` boolean arrays.

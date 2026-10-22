@@ -23,17 +23,37 @@ from .physics import G_SEDENTARY, RoomParams, calibrate, estimate_occupancy
 
 
 class TimeOfWeekBaseline:
-    """Predict the training-set mean occupancy for each (weekday, hour)."""
+    """Predict the training-set mean occupancy for each (weekday, hour).
+
+    Attributes:
+        table_: Mean occupancy per (day of week, hour) slot (after ``fit``).
+        default_: Global training mean, used for unseen slots.
+    """
 
     def fit(self, index: pd.DatetimeIndex, y: np.ndarray) -> "TimeOfWeekBaseline":
-        """Learn slot means. ``index`` gives the timestamp of each target."""
+        """Learn slot means.
+
+        Args:
+            index: Timestamp of each target value.
+            y: Observed occupancy [persons] (NaNs are ignored in the slot means).
+
+        Returns:
+            ``self``.
+        """
         s = pd.Series(np.asarray(y, float), index=index)
         self.table_ = s.groupby([index.day_of_week, index.hour]).mean()
         self.default_ = float(np.nanmean(y))
         return self
 
     def predict(self, index: pd.DatetimeIndex) -> np.ndarray:
-        """Look up the slot mean for each timestamp (global mean if unseen)."""
+        """Look up the slot mean for each timestamp (global mean if unseen).
+
+        Args:
+            index: Timestamps to predict.
+
+        Returns:
+            Predicted occupancy [persons], one value per timestamp.
+        """
         keys = list(zip(index.day_of_week, index.hour))
         return np.array([self.table_.get(k, self.default_) for k in keys], float)
 
@@ -48,21 +68,44 @@ class PhysicsEstimator:
         g: Per-person CO2 generation [m^3/s].
         params: If given, skip calibration and use these parameters
             (e.g. nominal design values).
+
+    Attributes:
+        params_: Room parameters (``None`` until ``fit`` unless supplied).
     """
 
     def __init__(self, dt: float, scheme: str = "savgol", window: int = 5,
                  g: float = G_SEDENTARY, params: RoomParams | None = None):
+        """Store the configuration; see the class docstring for the arguments."""
         self.dt, self.scheme, self.window, self.g = dt, scheme, window, g
         self.params_ = params
 
     def fit(self, co2: np.ndarray, y: np.ndarray) -> "PhysicsEstimator":
-        """Calibrate V, Q, C_out by least squares (see :func:`physics.calibrate`)."""
+        """Calibrate V, Q, C_out by least squares (see :func:`~occupancy.physics.calibrate`).
+
+        Args:
+            co2: Uniformly sampled CO2 [ppm]; NaN rows are ignored.
+            y: Measured occupancy [persons] on the same grid.
+
+        Returns:
+            ``self``.
+
+        Raises:
+            ValueError: if the calibration is non-physical or has too
+                few valid samples.
+        """
         if self.params_ is None:
             self.params_ = calibrate(co2, y, self.dt, self.g, self.scheme, self.window)
         return self
 
     def predict(self, co2: np.ndarray) -> np.ndarray:
-        """Estimate occupancy from a contiguous uniformly sampled CO2 array."""
+        """Estimate occupancy from a contiguous uniformly sampled CO2 array.
+
+        Args:
+            co2: CO2 [ppm] on the grid spacing ``dt`` given at construction.
+
+        Returns:
+            Estimated occupancy [persons], same shape as ``co2``.
+        """
         return estimate_occupancy(co2, self.dt, self.params_, self.scheme, self.window)
 
 
@@ -76,6 +119,9 @@ def make_ml_model(name: str, seed: int = 0):
     Args:
         name: ``linear``, ``tree``, ``forest``, ``svr`` or ``mlp``.
         seed: Random seed for stochastic models.
+
+    Returns:
+        An unfitted scikit-learn estimator (``fit(X, y)``/``predict(X)``).
 
     Raises:
         ValueError: for an unknown name.

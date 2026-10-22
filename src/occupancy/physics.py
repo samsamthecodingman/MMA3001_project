@@ -60,6 +60,7 @@ class RoomParams:
     g: float = G_SEDENTARY
 
     def __post_init__(self) -> None:
+        """Validate that V, Q and g are strictly positive."""
         if self.V <= 0 or self.Q <= 0 or self.g <= 0:
             raise ValueError("V, Q and g must be strictly positive")
 

@@ -230,6 +230,7 @@ def run_case(
     freq: str,
     scheme: str,
     occ_shift: pd.Timedelta | None = None,
+    center: bool = True,
 ) -> dict[str, float]:
     """Calibrate on the first 70 % and estimate occupancy on the last 30 %.
 
@@ -241,6 +242,8 @@ def run_case(
         scheme: Derivative scheme.
         occ_shift: If given, the true occupancy index is shifted by this
             amount before the interval mean is taken (alignment test).
+        center: Passed to ``prepare_room``; the alignment study sets it
+            False and applies its own explicit shifts.
 
     Returns:
         Dict with signed relative errors ``V_relerr``, ``Q_relerr``
@@ -250,7 +253,7 @@ def run_case(
     """
     dt = pd.Timedelta(freq).total_seconds()
     occ_in = occ if occ_shift is None else occ.shift(freq=occ_shift)
-    tab = prepare_room(env, occ_in, freq=freq)
+    tab = prepare_room(env, occ_in, freq=freq, center=center)
     C = tab["co2_ppm"].to_numpy(float)
     N = tab["occupancy"].to_numpy(float)
     cut = int(TRAIN_FRAC * len(tab))
@@ -375,7 +378,7 @@ def plot_noise(df: pd.DataFrame) -> None:
 def alignment() -> pd.DataFrame:
     """Test whether re-centring the occupancy target changes V/Q bias.
 
-    ``prepare_room`` labels the occupancy mean of ``[t, t+dt)`` at ``t``
+    With ``center=False``, ``prepare_room`` labels the occupancy mean of ``[t, t+dt)`` at ``t``
     (centre of mass ``t + dt/2``) while CO2 is the instantaneous value at
     ``t``. With the 1-minute truth ``occ`` we build:
 
@@ -401,7 +404,7 @@ def alignment() -> pd.DataFrame:
             for freq in FREQS:
                 half = pd.Timedelta(freq) / 2
                 for variant, shift in (("interval_mean", None), ("centred", half), ("anti_centred", -half)):
-                    r = run_case(env, occ, truth, freq, "savgol", occ_shift=shift)
+                    r = run_case(env, occ, truth, freq, "savgol", occ_shift=shift, center=False)
                     rows.append(dict(seed=seed, sample_mean_s=sm, freq=freq, variant=variant, **r))
     df = pd.DataFrame(rows)
     _save_csv(df, "alignment.csv")
