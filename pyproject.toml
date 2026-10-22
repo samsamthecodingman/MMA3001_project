@@ -6,11 +6,10 @@ build-backend = "setuptools.build_meta"
 name = "occupancy"
 version = "0.1.0"
 description = "Virtual occupancy sensing from building environmental sensors (MMA3001 project)"
-requires-python = ">=3.10"
-dependencies = ["numpy", "pandas", "scipy", "scikit-learn", "matplotlib", "pyarrow"]
+requires-python = ">=3.11"
+dependencies = ["numpy", "pandas", "scipy", "scikit-learn", "matplotlib", "pyarrow", "openpyxl"]
 
 [project.optional-dependencies]
-nn = ["torch"]
 dev = ["pytest", "pytest-html", "pdoc"]
 
 [tool.setuptools.packages.find]

@@ -33,6 +33,7 @@ def synthetic_rooms(n: int = 4, days: int = 42) -> dict[str, pd.DataFrame]:
 
 
 def main() -> None:
+    """Parse command-line arguments, evaluate all models per room and write results."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--synthetic", action="store_true")
     ap.add_argument("--data", type=pathlib.Path)

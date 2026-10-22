@@ -105,6 +105,7 @@ def profile_pipeline() -> str:
 
 
 def main() -> None:
+    """Run all timing, scaling and FLOP analyses and write the result files."""
     RES.mkdir(parents=True, exist_ok=True)
     FIG.mkdir(parents=True, exist_ok=True)
     perf = scaling()

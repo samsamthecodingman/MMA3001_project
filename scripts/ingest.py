@@ -55,6 +55,7 @@ def env_sensors_by_room(sheet: pd.DataFrame) -> dict[str, list[str]]:
 
 
 def main() -> None:
+    """Run the ingest, audit and association steps described in the module docstring."""
     PROC.mkdir(parents=True, exist_ok=True)
     AUDIT.mkdir(parents=True, exist_ok=True)
     timings = {}
@@ -119,6 +120,7 @@ def main() -> None:
 
     # ---- data-driven sensor/space association
     def resid(x: pd.Series) -> pd.Series:
+        """Remove the time-of-week (weekday, hour) mean from a series."""
         return x - x.groupby([x.index.day_of_week, x.index.hour]).transform("mean")
 
     rows, tables = [], []

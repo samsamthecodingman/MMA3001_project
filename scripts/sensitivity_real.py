@@ -101,6 +101,7 @@ def subsample_days(idx: pd.DatetimeIndex, fit: np.ndarray, n_days: int, rng) -> 
 
 
 def main() -> None:
+    """Run the four real-data studies and write their CSV files and figures."""
     RES.mkdir(parents=True, exist_ok=True)
     tables = {f: load_pair(f) for f in ("10min", "15min", "30min")}
 
