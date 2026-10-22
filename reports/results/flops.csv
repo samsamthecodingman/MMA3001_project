@@ -1,0 +1,8 @@
+method,flops,bytes,arith_intensity_flop_per_byte
+Euler step,7,24,0.2916666666666667
+RK4 step,32,24,1.3333333333333333
+exact step (lfilter),6,24,0.25
+"inverse, central diff",8,16,0.5
+"inverse, Savitzky-Golay(5)",15,16,0.9375
+MLP inference (24-64-32-1),7328,200,36.64
+"random forest (200 trees, depth<=12)",2400,192,12.5

@@ -151,6 +151,38 @@ def simulate(
     return C
 
 
+def simulate_uniform_fast(N: np.ndarray, dt: float, p: RoomParams, C0: float | None = None) -> np.ndarray:
+    """Vectorised exact simulation on a uniform grid.
+
+    With constant step ``dt`` the exact update
+    ``C[k+1] = a C[k] + (1 - a) Css[k]``, ``a = exp(-dt/tau)``, is a
+    first-order linear recurrence, i.e. an IIR filter, so it can be
+    evaluated in compiled code by :func:`scipy.signal.lfilter` instead
+    of a Python loop. Gives identical results to
+    ``simulate(..., method="exact")`` (to round-off).
+
+    Args:
+        N: Occupancy per step [persons], shape (n,).
+        dt: Uniform step [s].
+        p: Room parameters.
+        C0: Initial concentration [ppm]; defaults to ``p.C_out``.
+
+    Returns:
+        Concentration [ppm], shape (n,).
+    """
+    from scipy.signal import lfilter
+
+    N = np.asarray(N, dtype=float)
+    a = np.exp(-dt / p.tau)
+    css = p.steady_state(N)
+    c0 = p.C_out if C0 is None else C0
+    # y[k] = a*y[k-1] + (1-a)*css[k-1]; feed css delayed by one sample
+    x = np.concatenate([[0.0], css[:-1]])
+    # transposed direct form: y[0] = b0*x[0] + zi = c0 since x[0] = 0
+    y, _ = lfilter([1 - a], [1, -a], x, zi=[c0])
+    return y
+
+
 def euler_stable_step(p: RoomParams) -> float:
     """Largest step for which explicit Euler is stable [s].
 

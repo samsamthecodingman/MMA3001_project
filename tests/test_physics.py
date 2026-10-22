@@ -107,3 +107,14 @@ def test_invalid_inputs():
         simulate(np.array([0.0, 1.0]), np.array([1.0, 1.0]), P, method="bogus")
     with pytest.raises(ValueError):
         calibrate(np.full(100, 420.0), np.zeros(100), 60.0)  # unexcited room
+
+
+def test_fast_simulation_matches_loop():
+    from occupancy.physics import simulate_uniform_fast
+
+    rng = np.random.default_rng(3)
+    t = np.arange(0, 86400, 60.0)
+    N = rng.integers(0, 15, len(t)).astype(float)
+    ref = simulate(t, N, P, C0=800.0, method="exact")
+    fast = simulate_uniform_fast(N, 60.0, P, C0=800.0)
+    np.testing.assert_allclose(fast, ref, rtol=1e-10)
