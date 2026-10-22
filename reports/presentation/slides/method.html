@@ -1,0 +1,20 @@
+<section id="method" data-transition="fade" style="background:#F6F7F4;color:#13293D;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15">One well-mixed zone, one CO₂ balance</h2>
+<p style="font-family:'Libre Baskerville', Georgia, serif;font-size:56px;line-height:1.2;color:#13293D;background:#FFFFFF;padding:36px 48px;border:1px solid #D9DEE3;border-radius:20px">V dC/dt = 10⁶ g N − Q (C − C_out)</p>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#E6EEF4;padding:40px;border-radius:20px">
+<h3 style="font-size:40px;font-weight:700;color:#13293D">Forward</h3>
+<p style="font-size:30px;line-height:1.35;color:#3D4B5C">Euler, RK4 and the exact solution as an IIR filter: used to verify the code</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#E6EEF4;padding:40px;border-radius:20px">
+<h3 style="font-size:40px;font-weight:700;color:#13293D">Inverse</h3>
+<p style="font-size:30px;line-height:1.35;color:#3D4B5C">N̂ from C and a finite-difference dC/dt (Savitzky–Golay)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#E6EEF4;padding:40px;border-radius:20px">
+<h3 style="font-size:40px;font-weight:700;color:#13293D">Calibrate</h3>
+<p style="font-size:30px;line-height:1.35;color:#3D4B5C">Linear in the unknowns: one least-squares solve gives V, Q, C_out</p>
+</div>
+</div>
+<p style="font-size:32px;line-height:1.4;color:#3D4B5C">Compared with: time-of-week baseline · ridge · tree · random forest · SVR · MLP · physics + ML hybrids</p>
+<aside>The model treats the zone as one well-mixed volume. People generate CO2 at g per person; ventilation Q exchanges it with supply air. Forward: I solve it three ways, which I use to verify the code. Inverse: rearranging gives occupancy from the CO2 level and its slope, which I get with finite differences. Calibration: the equation is linear in V, Q and Q times C_out, so it's a single least-squares solve. No iteration, unique answer. I compare it with a schedule baseline and five scikit-learn models on causal features, plus hybrids that feed the physics estimate to the ML model.</aside>
+</section>

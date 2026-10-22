@@ -1,0 +1,24 @@
+<section id="problem" data-transition="fade" style="background:#F6F7F4;color:#13293D;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:56px">
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15">Can the CO₂ sensors we already have count people?</h2>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFFFF;padding:40px;border:1px solid #D9DEE3;border-radius:20px">
+<x-icon name="Cloud" style="color:#2E6F9E;width:72px;height:72px"></x-icon>
+<h3 style="font-size:44px;font-weight:700;color:#13293D">Input</h3>
+<p style="font-size:32px;line-height:1.35;color:#3D4B5C">CO₂ [ppm], temperature, humidity, irregular ~10 min</p>
+</div>
+<x-shape kind="arrow-right" style="background:#D9822B;width:96px;height:48px"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFFFF;padding:40px;border:1px solid #D9DEE3;border-radius:20px">
+<x-icon name="Settings" style="color:#2E6F9E;width:72px;height:72px"></x-icon>
+<h3 style="font-size:44px;font-weight:700;color:#13293D">Estimator</h3>
+<p style="font-size:32px;line-height:1.35;color:#3D4B5C">Physics mass balance or ML regressor, calibrated on counter data</p>
+</div>
+<x-shape kind="arrow-right" style="background:#D9822B;width:96px;height:48px"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FFFFFF;padding:40px;border:1px solid #D9DEE3;border-radius:20px">
+<x-icon name="Users" style="color:#2E6F9E;width:72px;height:72px"></x-icon>
+<h3 style="font-size:44px;font-weight:700;color:#13293D">Output</h3>
+<p style="font-size:32px;line-height:1.35;color:#3D4B5C">Occupants per 15 min, plus an occupied/vacant flag</p>
+</div>
+</div>
+<p style="font-size:36px;line-height:1.4;color:#3D4B5C;width:1500px">HVAC ventilates to a timetable that assumes full rooms. People-counters are expensive and rare; CO₂ sensors are cheap and common. A trustworthy “virtual counter” enables demand-controlled ventilation.</p>
+<aside>Ventilation is one of the biggest energy loads in a university building, and it usually runs to a timetable. Demand-controlled ventilation needs to know how many people are actually in each zone. Counters are rare; CO2 sensors are everywhere. So: input is CO2, temperature and humidity every ~10 minutes; output is an occupancy estimate every 15 minutes. Intended use: ventilation scheduling and utilisation reports, not safety-critical counting.</aside>
+</section>

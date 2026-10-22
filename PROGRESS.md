@@ -15,10 +15,17 @@ resume after interruptions). Plan: see "Execution order" below.
 - [x] Real-data sensitivity: scheme × grid, g-invariance, hyper-parameters, learning curve
 - [x] Docs: README, LICENSE, Makefile, requirements, docstrings, pdoc HTML (docs/), pytest-html report
 - [x] Report → reports/report.pdf (body ends p.10); DECISIONS.md; AI_USE.md (draft — student must complete [YOU] parts); VIVA_PREP.md
-- [ ] Notebook walkthrough (in progress)
-- [ ] Independent code review → fixes
-- [ ] Clean `make all` reproducibility run
-- [ ] Presentation slides (nice to have)
+- [x] Notebook walkthrough (notebooks/walkthrough.ipynb, runs in ~22 s on synthetic data)
+- [x] Independent code review → fixes (balanced accuracy, coverage floor, common scoring mask, DST, learning curve)
+- [x] Clean `make all` reproducibility run from raw zips (exit 0, 27 tests pass)
+- [x] Presentation: 7-slide deck with speaker notes (Claude Slides artifact; source in reports/presentation/)
+
+## Student to-do
+- Complete the **[YOU]** sections in AI_USE.md and the AI summary in report §8
+- Read DECISIONS.md and VIVA_PREP.md; be able to derive the items in VIVA_PREP §D
+- Confirm the topic/dataset with the coordinator; mention the inferred sensor–space pairing
+- Add your name/ID details if Moodle requires; zip a clone of the repo for submission
+- Share the slide deck from its page if anyone else needs to open it
 
 ## Data facts (from inspection)
 - Env CSV: one row per sensor report; columns id, sensorid, devicetype, jsondata (list of {values:[{time,value}], variable:{name,unit}}), status, ... Variables include CO2 (ppm), Humidity (HR%), Temperature (°C), Pressure (mb), Formaldehyde, LVOC, PM, Battery.

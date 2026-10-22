@@ -1,0 +1,21 @@
+<section id="data" data-transition="fade" style="background:#F6F7F4;color:#13293D;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15">The data had to be audited before it could be trusted</h2>
+<div style="display:flex;flex-direction:row;gap:72px;align-items:center">
+<img src="/_blob/548d6c9384523a0999bef57d43143074" alt="Timeline of unique environmental-sensor reports per day and occupancy-counter coverage; three sensors are frozen" style="width:640px;height:640px;object-fit:contain;background:#FFFFFF;border-radius:16px">
+<div style="flex:1;display:flex;flex-direction:column;gap:44px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'Libre Baskerville', Georgia, serif;font-size:96px;font-weight:700;line-height:1.05;color:#D9822B">76 %</p>
+<p style="font-size:32px;line-height:1.3;color:#3D4B5C">of environmental rows were re-sent duplicates; 3 of 5 sensors were frozen</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'Libre Baskerville', Georgia, serif;font-size:96px;font-weight:700;line-height:1.05;color:#D9822B">0</p>
+<p style="font-size:32px;line-height:1.3;color:#3D4B5C">working sensors linked to a counted space by the location sheet</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'Libre Baskerville', Georgia, serif;font-size:96px;font-weight:700;line-height:1.05;color:#2E6F9E">r = 0.65</p>
+<p style="font-size:32px;line-height:1.3;color:#3D4B5C">pairing inferred from data, after removing the weekly pattern; weaker pairs kept as controls</p>
+</div>
+</div>
+</div>
+<aside>The audit changed the project. Three of five env sensors were frozen, re-sending one payload tens of thousands of times: 76% of rows were duplicates. The location sheet didn't link any working sensor to a counter, and its occupancy tab is labelled invalid. So I paired them from the data: correlation of CO2 and headcount after subtracting each series' time-of-week mean, so that 'both busy in office hours' can't create a match. One pair stood out at r = 0.65 over about 25 labelled days; two weaker pairs became controls. The 'Do not use' example data was not used.</aside>
+</section>

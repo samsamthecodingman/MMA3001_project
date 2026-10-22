@@ -1,0 +1,19 @@
+<section id="results" data-transition="fade" style="background:#F6F7F4;color:#13293D;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Libre Baskerville', Georgia, serif;font-size:64px;font-weight:700;line-height:1.15">Three parameters nearly match a random forest</h2>
+<div style="display:flex;flex-direction:row;gap:64px;align-items:center">
+<img src="/_blob/18b2c74db439210336a6985effcea9ba" alt="One teaching week: measured occupancy against time-of-week, physics and random-forest out-of-fold predictions, with CO2 below" style="width:760px;height:622px;object-fit:contain;background:#FFFFFF;border-radius:16px">
+<div style="flex:1;display:flex;flex-direction:column;gap:28px">
+<table style="font-size:32px;color:#13293D;font-family:'Public Sans', Arial, sans-serif">
+<tr><th style="width:46%;text-align:left">Model</th><th style="width:27%;text-align:right">R²</th><th style="width:27%;text-align:right">MAE</th></tr>
+<tr><td style="text-align:left">Timetable baseline</td><td style="text-align:right">−0.05</td><td style="text-align:right">2.35</td></tr>
+<tr style="background:#FBEBDD"><td style="text-align:left">Physics, 3 params</td><td style="text-align:right">0.47</td><td style="text-align:right">1.60</td></tr>
+<tr><td style="text-align:left">Linear (ridge)</td><td style="text-align:right">0.45</td><td style="text-align:right">1.63</td></tr>
+<tr><td style="text-align:left">MLP 64-32</td><td style="text-align:right">0.37</td><td style="text-align:right">1.71</td></tr>
+<tr><td style="text-align:left">Random forest</td><td style="text-align:right">0.51</td><td style="text-align:right">1.50</td></tr>
+</table>
+<p style="font-size:28px;line-height:1.35;color:#3D4B5C">Blocked leave-one-week-out CV, MAE in people. Physics needs 4 labelled days (forest ~14) and fits 300× faster.</p>
+<p style="font-size:28px;line-height:1.35;color:#3D4B5C">Controls (sensor not in the room): forest R² only 0.27–0.40.</p>
+</div>
+</div>
+<aside>Validation is blocked leave-one-week-out cross-validation with one-day buffers, because random folds leak through autocorrelation. The timetable baseline explains nothing. The three-parameter physics model gets R squared 0.47, close to the random forest's 0.51, with the smallest bias, about a quarter of the training data and 300 times faster fitting. The MLP doesn't beat linear regression on 2,400 tabular samples. On the control pairs the gain is much smaller, which supports the claim that the signal is room-level. Weaknesses: every model under-predicts peaks above about 10 people, and none is good at detecting vacancy (balanced accuracy at most 0.65), because CO2 lingers after people leave. A chronological split put the test week in exams; the timetable failed there (MAE 2.4) while the CO2 models held up.</aside>
+</section>

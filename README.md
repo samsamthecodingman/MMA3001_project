@@ -110,6 +110,13 @@ interpreter. For the exact pinned environment use `pip install -r requirements.t
 * Use of AI assistance: [`AI_USE.md`](AI_USE.md).
 * Data description: [`data/README.md`](data/README.md).
 
+## Presentation
+
+A 7-slide, 5-minute deck with speaker notes is published as a private Claude
+Slides artifact (https://claude.ai/artifact/2ZWLg4uj7SJagS3sycTahe; downloadable
+as PPTX/PDF from its page). Its slide source is kept in `reports/presentation/`.
+Interview preparation notes: `VIVA_PREP.md`.
+
 ## Licence
 
 The code is released under the MIT licence; see [`LICENSE`](LICENSE).
