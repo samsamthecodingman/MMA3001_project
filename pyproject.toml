@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "occupancy"
+version = "0.1.0"
+description = "Virtual occupancy sensing from building environmental sensors (MMA3001 project)"
+requires-python = ">=3.10"
+dependencies = ["numpy", "pandas", "scipy", "scikit-learn", "matplotlib", "pyarrow"]
+
+[project.optional-dependencies]
+nn = ["torch"]
+dev = ["pytest", "pytest-html", "pdoc"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
