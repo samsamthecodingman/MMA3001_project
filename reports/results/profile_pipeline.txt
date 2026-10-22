@@ -1,0 +1,33 @@
+         7849308 function calls (7779169 primitive calls) in 14.905 seconds
+
+   Ordered by: cumulative time
+   List reduced from 4085 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000   14.932   14.932 <frozen runpy>:269(run_path)
+        1    0.000    0.000   14.931   14.931 <frozen runpy>:91(_run_module_code)
+        1    0.000    0.000   14.931   14.931 <frozen runpy>:65(_run_code)
+    385/1    0.007    0.000   14.931   14.931 {built-in method builtins.exec}
+        1    0.000    0.000   14.931   14.931 /home/user/mma3001_project/scripts/run_experiment.py:1(<module>)
+        1    0.001    0.001   14.647   14.647 /home/user/mma3001_project/scripts/run_experiment.py:35(main)
+        4    0.008    0.002   14.223    3.556 /home/user/mma3001_project/src/occupancy/pipeline.py:54(run_room)
+    60/28    0.001    0.000   12.362    0.442 /home/user/mma3001_project/.venv/lib/python3.13/site-packages/sklearn/base.py:1381(wrapper)
+       32    0.001    0.000   11.106    0.347 /usr/lib/python3.13/multiprocessing/pool.py:500(_wait_for_updates)
+     3232    0.017    0.000   10.822    0.003 /home/user/mma3001_project/.venv/lib/python3.13/site-packages/joblib/parallel.py:1692(_get_outputs)
+      128    0.002    0.000    9.319    0.073 /usr/lib/python3.13/multiprocessing/connection.py:1160(wait)
+      128    0.004    0.000    9.288    0.073 /usr/lib/python3.13/selectors.py:385(select)
+       52    0.001    0.000    7.154    0.138 /usr/lib/python3.13/threading.py:1059(join)
+       52    0.002    0.000    7.153    0.138 {method 'join' of '_thread._ThreadHandle' objects}
+       16    0.001    0.000    6.368    0.398 /home/user/mma3001_project/.venv/lib/python3.13/site-packages/sklearn/pipeline.py:578(fit)
+        8    0.002    0.000    5.922    0.740 /home/user/mma3001_project/.venv/lib/python3.13/site-packages/sklearn/ensemble/_forest.py:302(fit)
+   116/17    0.004    0.000    5.670    0.334 /usr/lib/python3.13/threading.py:1001(_bootstrap)
+       16    0.000    0.000    5.669    0.354 /home/user/mma3001_project/.venv/lib/python3.13/site-packages/sklearn/utils/parallel.py:54(__call__)
+       16    0.001    0.000    5.669    0.354 /home/user/mma3001_project/.venv/lib/python3.13/site-packages/joblib/parallel.py:1995(__call__)
+   116/17    0.020    0.000    5.665    0.333 /usr/lib/python3.13/threading.py:1028(_bootstrap_inner)
+       16    0.000    0.000    5.663    0.354 /home/user/mma3001_project/.venv/lib/python3.13/site-packages/joblib/parallel.py:1425(_terminate_and_reset)
+       16    0.004    0.000    5.663    0.354 /home/user/mma3001_project/.venv/lib/python3.13/site-packages/joblib/_parallel_backends.py:323(terminate)
+       16    0.001    0.000    5.643    0.353 /usr/lib/python3.13/multiprocessing/pool.py:654(terminate)
+       16    0.000    0.000    5.639    0.352 /usr/lib/python3.13/multiprocessing/util.py:276(__call__)
+       16    0.000    0.000    5.639    0.352 /usr/lib/python3.13/multiprocessing/pool.py:680(_terminate_pool)
+
+

@@ -28,13 +28,13 @@ class TimeOfWeekBaseline:
     def fit(self, index: pd.DatetimeIndex, y: np.ndarray) -> "TimeOfWeekBaseline":
         """Learn slot means. ``index`` gives the timestamp of each target."""
         s = pd.Series(np.asarray(y, float), index=index)
-        self.table_ = s.groupby([index.dayofweek, index.hour]).mean()
+        self.table_ = s.groupby([index.day_of_week, index.hour]).mean()
         self.default_ = float(np.nanmean(y))
         return self
 
     def predict(self, index: pd.DatetimeIndex) -> np.ndarray:
         """Look up the slot mean for each timestamp (global mean if unseen)."""
-        keys = list(zip(index.dayofweek, index.hour))
+        keys = list(zip(index.day_of_week, index.hour))
         return np.array([self.table_.get(k, self.default_) for k in keys], float)
 
 

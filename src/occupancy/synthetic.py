@@ -43,7 +43,7 @@ def occupancy_schedule(
     for d in range(days):
         day = pd.Timestamp(start) + pd.Timedelta(days=d)
         in_day = (idx >= day) & (idx < day + pd.Timedelta(days=1))
-        if day.dayofweek >= 5:
+        if day.day_of_week >= 5:
             if rng.random() < 0.2:  # occasional weekend visit
                 a = rng.uniform(10, 14)
                 N[in_day & (hours >= a) & (hours < a + rng.uniform(1, 3))] = rng.integers(1, 3)
