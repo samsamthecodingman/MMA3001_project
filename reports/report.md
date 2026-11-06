@@ -2,7 +2,7 @@
 title: "Virtual Occupancy Sensing from Building CO₂ Data: a Physics-Based Mass Balance versus Machine-Learning Regression"
 subtitle: "MMA3001 Numerical Methods and Machine Learning — Individual Project"
 author: "Samuel Roberts"
-date: "October 2026"
+date: "November 2026"
 ---
 
 **Repository:** `github.com/samsamthecodingman/MMA3001_project` (code, HTML documentation in `docs/`, test report in `reports/test_report.html`, decision log `DECISIONS.md`, AI-use statement `AI_USE.md`).
@@ -297,7 +297,7 @@ Full statement in `AI_USE.md`. AI tools (Anthropic Claude, via Claude Code) were
 - running analyses;
 - drafting this report.
 
-The student set the goal and constraints, selected the dataset, supplied the data, and is responsible for reviewing every decision in `DECISIONS.md` and every claim in this report. *[Student to complete: what you personally verified, which AI suggestions you rejected or changed, and how it affected your understanding — see AI_USE.md.]*
+The student set the goal and constraints, selected the dataset, supplied the data, and is responsible for reviewing every decision in `DECISIONS.md` and every claim in this report. My role was to orchestrate rather than to write code: I split the work into stages with acceptance criteria (numerics verified on synthetic rooms before real data; every model must beat a no-sensor baseline; validation must respect time order), reviewed each stage's evidence before approving the next, and commissioned an independent AI review. I intervened where judgement mattered most: I refused to accept the provided sensor–space metadata or a single favourable pairing without controls, required negative results to be diagnosed rather than reported as-is, and questioned a flattering F1 score, which was replaced by balanced accuracy. The trade-off is a shallower grasp of low-level implementation, which I offset by working through the decision log so I can justify each choice.
 
 # References
 

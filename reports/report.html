@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
@@ -49,7 +49,7 @@ Physics-Based Mass Balance versus Machine-Learning Regression</h1>
 <p class="subtitle">MMA3001 Numerical Methods and Machine Learning —
 Individual Project</p>
 <p class="author">Samuel Roberts</p>
-<p class="date">October 2026</p>
+<p class="date">November 2026</p>
 </header>
 <p><strong>Repository:</strong>
 <code>github.com/samsamthecodingman/MMA3001_project</code> (code, HTML
@@ -806,10 +806,19 @@ via Claude Code) were used extensively, as the unit permits:</p>
 </ul>
 <p>The student set the goal and constraints, selected the dataset,
 supplied the data, and is responsible for reviewing every decision in
-<code>DECISIONS.md</code> and every claim in this report. <em>[Student
-to complete: what you personally verified, which AI suggestions you
-rejected or changed, and how it affected your understanding — see
-AI_USE.md.]</em></p>
+<code>DECISIONS.md</code> and every claim in this report. My role was to
+orchestrate rather than to write code: I split the work into stages with
+acceptance criteria (numerics verified on synthetic rooms before real
+data; every model must beat a no-sensor baseline; validation must
+respect time order), reviewed each stage’s evidence before approving the
+next, and commissioned an independent AI review. I intervened where
+judgement mattered most: I refused to accept the provided sensor–space
+metadata or a single favourable pairing without controls, required
+negative results to be diagnosed rather than reported as-is, and
+questioned a flattering F1 score, which was replaced by balanced
+accuracy. The trade-off is a shallower grasp of low-level
+implementation, which I offset by working through the decision log so I
+can justify each choice.</p>
 <h1 id="references">References</h1>
 <p>[1] ASHRAE, <em>Standard 62.1-2022: Ventilation and Acceptable Indoor
 Air Quality</em>, Atlanta, 2022.</p>
