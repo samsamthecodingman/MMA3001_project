@@ -71,6 +71,7 @@ Requires Python 3.13 (CPU only; no GPU or deep-learning framework is used).
 ```bash
 python3 -m venv .venv
 make install                      # pip install -e ".[dev]" into .venv
+source .venv/bin/activate         # activate the environment
 make test                         # run the tests
 python scripts/run_experiment.py --synthetic   # full comparison, needs no data
 ```
@@ -104,7 +105,7 @@ interpreter. For the exact pinned environment use `pip install -r requirements.t
 ## Documentation and reports
 
 * API docs (pdoc, Google-style docstrings): open `docs/index.html` after `make docs`.
-* Report: `reports/report.pdf` (to be added).
+* Report: [`reports/report.pdf`](reports/report.pdf).
 * Test report: `reports/test_report.html` (after `make test-report`).
 * Design decisions: [`DECISIONS.md`](DECISIONS.md).
 * Use of AI assistance: [`AI_USE.md`](AI_USE.md).
@@ -112,10 +113,8 @@ interpreter. For the exact pinned environment use `pip install -r requirements.t
 
 ## Presentation
 
-A 7-slide, 5-minute deck with speaker notes is published as a private Claude
-Slides artifact (https://claude.ai/artifact/2ZWLg4uj7SJagS3sycTahe; downloadable
-as PPTX/PDF from its page). Its slide source is kept in `reports/presentation/`.
-Interview preparation notes: `VIVA_PREP.md`.
+The slide source for the 7-slide, 5-minute presentation (with speaker notes)
+is kept in `reports/presentation/` (`deck.json` and one HTML file per slide).
 
 ## Licence
 
