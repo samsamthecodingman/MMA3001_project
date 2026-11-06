@@ -15,8 +15,8 @@ Drive. Download:
 | `5occupancySensor_MayToDec2024_9MRows.zip` | occupancy-counter events (~9 M rows) |
 | `Sensor ID and Locations.xlsx` | sensor IDs, buildings/rooms (sheets `ENV` and `OCC`) |
 
-The author also holds a copy in a **private** GitHub release `data-v1` of this
-repository (visible to the repository owner only).
+The data are restricted to the unit, so they are not redistributed here;
+request them from the MMA3001 teaching team.
 
 ## Where to put it
 
