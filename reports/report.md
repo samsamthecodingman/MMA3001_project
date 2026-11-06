@@ -15,7 +15,7 @@ date: "November 2026"
 
 **Why it matters.** A credible virtual sensor would let a facility manager drive ventilation and space-utilisation decisions from existing hardware. To be credible, it needs a quantified error and a known operating envelope.
 
-**Intended use.** Use the estimates for zone-level ventilation scheduling and utilisation reporting (15-min resolution, errors of ±1–2 people acceptable). They are *not* meant for safety-critical counting such as fire-egress limits.
+**Intended use.** The estimates are intended for zone-level ventilation scheduling and utilisation reporting (15-min resolution, errors of ±1–2 people acceptable). They are *not* meant for safety-critical counting such as fire-egress limits.
 
 **Scope and its limits.** The project compares a physics-based estimator (single-zone CO₂ mass balance), a schedule baseline, and five ML regressors, plus physics/ML hybrids. It does not do online control. Section 2 explains that the usable real data reduced to **one co-located sensor/space pair** (25 days) plus two control pairs. Conclusions about generalisation to other rooms are therefore limited (Section 7).
 
@@ -46,19 +46,19 @@ Function-level inputs and outputs are documented in the docstrings and the gener
 
 ## 2.2 Data audit
 
-The teaching team provided two exports: environmental sensors (179 447 rows, JSON payload per row) and occupancy counters (9.09 M event rows, 5 floor-spaces). The audit (`scripts/ingest.py`, Fig. 1) found three problems.
+The teaching team provided two exports [3]: environmental sensors (179 447 rows, JSON payload per row) and occupancy counters (9.09 M event rows, 5 floor-spaces). The audit (`scripts/ingest.py`, Fig. 1) found three problems.
 
 1. **Most env rows are duplicates.** 3 of the 5 env sensors are *frozen*: they re-send a single payload 11 k–59 k times, with 1–2 unique timestamps. In total, 136 604 of 179 447 rows are duplicates. Only two sensors carry live 10-min data: `…0869` (located in G.38, Building 60; Feb–Jun 2024) and `…0326` (not in the location sheet; Sep 2025–Apr 2026).
 2. **The location metadata does not link sensors to counters.** The location sheet maps neither live env sensor to a counted space. Its occupancy tab is labelled "SpaceFloorIDs Invalid", and only 2 of the 5 counter IDs appear in it at all.
 3. **The counters are reliable but intermittent.** Counts are integers with plausible ranges. However, there are 1 000–4 700 silences longer than 30 min per space, so the hold cap above is needed.
 
-![Data audit: unique env reports per day (top; three sensors are frozen) and occupancy-counter coverage (bottom).](figures/real_audit_timeline.png){width=85%}
+![Fig. 1: Data audit: unique env reports per day (top; three sensors are frozen) and occupancy-counter coverage (bottom).](figures/real_audit_timeline.png){width=85%}
 
-**Associating sensors with spaces from data.** The metadata could not be trusted, so I correlated each live sensor's CO₂ with each space's headcount on the common 15-min grid. Both series first had their own *time-of-week mean* removed. Without this step, any two series that are high during office hours would correlate.
+**Associating sensors with spaces from data.** The metadata could not be trusted, so each live sensor's CO₂ was correlated with each space's headcount on the common 15-min grid. Both series first had their own *time-of-week mean* removed. Without this step, any two series that are high during office hours would correlate.
 
 Sensor `…0869` and space `3e5a14df` had a residual correlation of r = 0.65 over 25 days of labelled data, far above every other pair (Fig. 2). This pair is taken as **co-located (primary)**. Two weaker pairs (r = 0.41, 0.33) are kept as **controls**. Sensor `…0326` correlates with nothing (|r| ≤ 0.03).
 
-![Residual (time-of-week-removed) correlation between live env sensors and occupancy spaces.](figures/real_association.png){width=70%}
+![Fig. 2: Residual (time-of-week-removed) correlation between live env sensors and occupancy spaces.](figures/real_association.png){width=70%}
 
 The "Example Data (Do not use)" files were not used, as instructed by the teaching team.
 
@@ -85,7 +85,7 @@ $$I(x)=S_k+w_k h_k (x-t_k),\qquad S_k=\textstyle\sum_{j<k} w_j h_j d_j .$$
 
 This aggregates 1.5–2.2 M events per space in 0.1–0.4 s. Both versions agree to 1e-9 on random event streams and on a hand-calculated case (`tests/test_io.py`).
 
-**Target alignment.** CO₂ is an instantaneous sample, whereas the target is an interval mean. Labelling the mean over $[t,t+\Delta t)$ at $t$ makes occupancy *lead* CO₂ by Δt/2. The synthetic study (§4) showed this biases the calibrated volume by +31–52 % at Δt = 15 min. The target is therefore **centred**, $[t-\Delta t/2,\,t+\Delta t/2)$, which reduced the bias to +2–19 %.
+**Target alignment.** CO₂ is an instantaneous sample, whereas the target is an interval mean. Labelling the mean over $[t,t+\Delta t)$ at $t$ makes occupancy *lead* CO₂ by Δt/2. The synthetic study (§4) showed this biases the calibrated volume by +31–52 % (median +47 %) at Δt = 15 min. The target is therefore **centred**, $[t-\Delta t/2,\,t+\Delta t/2)$, which reduced the bias to +2–19 % (median +14 %).
 
 ## 3.2 Physics-based estimator (ODE, finite differences, least squares)
 
@@ -95,14 +95,14 @@ $$V\frac{dC}{dt}=10^6\,g\,N(t)-Q\,(C-C_\text{out}).$$
 
 Here $g=5.2\times10^{-6}$ m³/s per person is the CO₂ generation of a sedentary adult [1, 2].
 
-- **Forward problem (verification and simulation).** Three solvers are implemented: explicit Euler, classical RK4, and the exact solution for piecewise-constant $N$. On a uniform grid, the exact update $C_{k+1}=aC_k+(1-a)C_{ss,k}$, with $a=e^{-\Delta t/\tau}$ and $\tau=V/Q$, is a first-order IIR filter evaluated with `scipy.signal.lfilter`.
-- **Inverse problem (the estimator).** $\hat N=\big(V\,\dot C+Q(C-C_\text{out})\big)/(10^6 g)$. The derivative $\dot C$ comes from a finite-difference scheme: backward (1st order), central (2nd order) or Savitzky–Golay (local quadratic fit, window 5), applied run-by-run so gaps do not contaminate neighbours.
+- **Forward problem (verification and simulation).** Three solvers are implemented: explicit Euler, classical RK4, and the exact solution for piecewise-constant $N$. On a uniform grid, the exact update $C_{k+1}=aC_k+(1-a)C_{ss,k}$, with $a=e^{-\Delta t/\tau}$ and $\tau=V/Q$, is a first-order IIR filter evaluated with `scipy.signal.lfilter` [4].
+- **Inverse problem (the estimator).** $\hat N=\big(V\,\dot C+Q(C-C_\text{out})\big)/(10^6 g)$. The derivative $\dot C$ comes from a finite-difference scheme: backward (1st order), central (2nd order) or Savitzky–Golay (local quadratic fit, window 5) [6], applied run-by-run so gaps do not contaminate neighbours.
 - **Calibration.** The model is linear in $(V,\,Q,\,QC_\text{out})$, so $N=a\dot C+bC+c$ is solved by ordinary least squares on training data. This gives $V=10^6ga$, $Q=10^6gb$ and $C_\text{out}=-c/b$. Calibration is one $n\times3$ least-squares solve: closed form, unique, and fast (2 ms).
 - **Assumptions.** Perfect mixing; constant Q and C_out within the calibration window; constant per-person generation; no other CO₂ sources or sinks; the sensor represents the zone.
 
 ## 3.3 Data-driven and hybrid models
 
-All models are scikit-learn regressors on **near-causal** features (current and past grid values only; the linear interpolation onto the grid looks at most one raw sample, about 10 min, ahead), so they could run in near real time:
+All models are scikit-learn [5] regressors on **near-causal** features (current and past grid values only; the linear interpolation onto the grid looks at most one raw sample, about 10 min, ahead), so they could run in near real time:
 
 - CO₂ and its first difference at lags 0–3;
 - CO₂ above a rolling 24-h 5th-percentile baseline;
@@ -155,7 +155,7 @@ Verification uses manufactured data where the truth is known exactly (`tests/`, 
 
 All 27 unit tests pass (`reports/test_report.html`).
 
-![Convergence of explicit Euler and RK4 against the exact solution (observed orders 0.97 and 4.14). The stability demonstration is in Appendix A (Fig. A0).](figures/fig_convergence.png){width=55%}
+![Fig. 3: Convergence of explicit Euler and RK4 against the exact solution (observed orders 0.97 and 4.14). The stability demonstration is in Appendix A (Fig. A0).](figures/fig_convergence.png){width=55%}
 
 # 5. Validation on real data
 
@@ -179,9 +179,9 @@ All 27 unit tests pass (`reports/test_report.html`).
 
 **Failure mode.** All models **under-predict peaks above ~10 people** (Fig. 5). The CO₂ at a sensor mounted high in a large workshop zone rises only 100–150 ppm for 15 occupants, because the effective volume is large. Accuracy at high occupancy is therefore limited by physics, not by the model class.
 
-![Blocked-CV MAE and R² for the primary and control pairs.](figures/real_cv_bars.png){width=80%}
+![Fig. 4: Blocked-CV MAE and R² for the primary and control pairs.](figures/real_cv_bars.png){width=72%}
 
-![Out-of-fold predictions for a teaching week (1–7 May 2024), with the measured CO₂ below.](figures/real_cv_week.png){width=78%}
+![Fig. 5: Out-of-fold predictions for a teaching week (1–7 May 2024), with the measured CO₂ below.](figures/real_cv_week.png){width=72%}
 
 ## 5.2 What the validation cannot establish
 
@@ -197,7 +197,7 @@ All 27 unit tests pass (`reports/test_report.html`).
 
 When trained on May (teaching) and tested on 6–13 June (exams), the schedule baseline fails badly: MAE 2.42, because it predicts teaching-week occupancy. The CO₂-based models adapt (forest MAE 0.65, physics 0.85; Fig. 6). This is the practical argument for a sensor-based estimate over a timetable. A timetable cannot know that the semester has ended.
 
-![Daily mean occupancy over the paired period; the shaded chronological test window falls in the exam period.](figures/real_chrono_regime.png){width=68%}
+![Fig. 6: Daily mean occupancy over the paired period; the shaded chronological test window falls in the exam period.](figures/real_chrono_regime.png){width=68%}
 
 # 6. Sensitivity, optimisation and performance
 
@@ -233,7 +233,7 @@ The best forest is only 0.02 above the default, and it was selected on the same 
 
 For commissioning a new room, the physics model's data efficiency matters more than the forest's final 0.05 R².
 
-![(a) Physics estimator MAE vs grid spacing and derivative scheme. (b) Learning curve: CV R² vs labelled training days.](figures/real_sens_physics_learning.png){width=88%}
+![Fig. 7: (a) Physics estimator MAE vs grid spacing and derivative scheme. (b) Learning curve: CV R² vs labelled training days.](figures/real_sens_physics_learning.png){width=78%}
 
 ## 6.3 Computational performance
 
@@ -242,7 +242,7 @@ For commissioning a new room, the physics model's data efficiency matters more t
 - Theoretical peak: $F_T = 4 \times 2.1\,\text{GHz} \times (512/64)\times 4 = 269$ GFLOP/s.
 - Measured dgemm: 188 GFLOP/s.
 - Measured stream bandwidth: 8.4 GB/s.
-- Machine balance ≈ 22 FLOP/byte.
+- Machine balance ≈ 22 FLOP/byte (roofline analysis as in the unit notes [7]).
 
 | Method | FLOP / sample | Bytes / sample | Arithmetic intensity | Measured time (n = 10⁶) |
 |---|---|---|---|---|
@@ -278,8 +278,8 @@ At building scale (hundreds of zones at 15-min resolution), every method is comp
 
 1. **Data auditing changed the project.** 76 % of env rows were duplicates, and the metadata was wrong. The physical pairing of sensor and space had to be inferred from data, with controls to test that inference.
 2. **Evaluation design mattered more than model choice.** A naive chronological split produced R² of −23 for the baseline and negative values for every model. The cause was an exam-period test window, not bad models. Blocked CV gave a fair picture.
-3. **A small timing detail produced a large parameter bias.** Labelling the interval mean at its start biased V by +40 %; centring fixed it. Synthetic verification exposed the bug before real data could hide it.
-4. **Simple models are hard to beat.** A 3-parameter physics model with one least-squares solve matched an MLP. It needs a quarter of the training data, and its parameter Q has engineering meaning.
+3. **A small timing detail produced a large parameter bias.** Labelling the interval mean at its start biased V by about +47 %; centring cut this to about +14 %. Synthetic verification exposed the bug before real data could hide it.
+4. **Simple models are hard to beat.** A 3-parameter physics model with one least-squares solve beat the MLP (MAE 1.60 vs 1.71 persons) and came within 0.1 persons of the random forest. It reached its accuracy with about a quarter of the labelled days the forest needed (4 vs 14), and its parameter Q has engineering meaning.
 
 **Proposed improvements, in priority order.**
 
@@ -290,14 +290,9 @@ At building scale (hundreds of zones at 15-min resolution), every method is comp
 
 # 8. AI use (summary)
 
-Full statement in `AI_USE.md`. AI tools (Anthropic Claude, via Claude Code) were used extensively, as the unit permits:
+Full statement in `AI_USE.md`. AI tools (Anthropic Claude, via Claude Code) were used extensively, as the unit permits, for planning, writing most of the code and tests, running analyses and drafting this report.
 
-- planning;
-- writing most of the code and tests;
-- running analyses;
-- drafting this report.
-
-The student set the goal and constraints, selected the dataset, supplied the data, and is responsible for reviewing every decision in `DECISIONS.md` and every claim in this report. My role was to orchestrate rather than to write code: I split the work into stages with acceptance criteria (numerics verified on synthetic rooms before real data; every model must beat a no-sensor baseline; validation must respect time order), reviewed each stage's evidence before approving the next, and commissioned an independent AI review. Most errors were caught by the AI's own tests and diagnostics (see `AI_USE.md` §5); my main intervention was commissioning a separate reviewer agent so the code was not only checked by the agent that wrote it, which exposed a misleading F1 score that was then replaced by balanced accuracy. The trade-off is a shallower grasp of low-level implementation, which I offset by working through the decision log so I can justify each choice.
+I set the goal and constraints, selected and supplied the dataset, and am responsible for every decision in `DECISIONS.md` and every claim in this report. My role was to orchestrate rather than write code: I split the work into stages with acceptance criteria (numerics verified on synthetic rooms before real data; every model must beat a no-sensor baseline; validation must respect time order) and reviewed each stage's evidence before approving the next. Most errors were caught by the AI's own tests (`AI_USE.md` §5). My main intervention was commissioning a separate reviewer agent, which exposed a misleading F1 score that was then replaced by balanced accuracy. The trade-off is a shallower grasp of low-level implementation, which I offset by working through the decision log so I can justify each choice.
 
 # References
 
@@ -305,7 +300,7 @@ The student set the goal and constraints, selected the dataset, supplied the dat
 
 [2] A. Persily and L. de Jonge, "Carbon dioxide generation rates for building occupants," *Indoor Air*, 27(5), 868–879, 2017.
 
-[3] Monash Smart Infrastructure, *MSI occupancy and environmental sensor exports (May–Dec 2024)*, provided for MMA3001, Monash University, 2026.
+[3] Monash Smart Infrastructure, *MSI environmental-sensor and occupancy-counter data exports*, provided for MMA3001, Monash University, 2026.
 
 [4] P. Virtanen et al., "SciPy 1.0," *Nature Methods*, 17, 261–272, 2020.
 

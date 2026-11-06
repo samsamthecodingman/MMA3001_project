@@ -3,7 +3,7 @@
 Technical decisions in the order they were made, with the evidence behind
 each. Every entry names the result that justified it, so each choice can be
 defended in the interview. "AI" marks decisions first proposed by the AI
-assistant. Review these and confirm you agree with them (see `AI_USE.md`).
+assistant; I reviewed each against its evidence (see `AI_USE.md`).
 
 | # | Decision | Alternatives considered | Evidence / reason |
 |---|----------|------------------------|-------------------|
@@ -13,7 +13,7 @@ assistant. Review these and confirm you agree with them (see `AI_USE.md`).
 | D4 | **Forward solvers:** Euler, RK4 and exact. Use the exact solution (IIR filter via `lfilter`) for production. | RK4 only | Observed orders were 0.97 (Euler) and 4.14 (RK4), matching theory. The exact solution has no truncation error. The lfilter form is ~40× faster than a Python loop (`reports/results/performance.csv`). |
 | D5 | **Resample** irregular (~10 min) env data to a 15-min grid by **linear** interpolation; do not bridge gaps > 45 min. | PCHIP, natural cubic, nearest | Hold-out test on real CO2: linear MAE 7.9 ppm, PCHIP +0.3 ppm, nearest 9.3, cubic 10.0 (`real_resample_holdout.png`). Cubic overshoots on noisy data. |
 | D6 | Occupancy target = **time-weighted mean headcount** per interval (zero-order hold between events, capped at 30 min). | Last value; event count | Headcount is a state reported at events, so a time average is the correct interval mean. The cap stops a silent (possibly offline) counter being read as "constant". |
-| D7 | **Centre** the occupancy interval on the CO2 timestamp, `[t − dt/2, t + dt/2)`. (AI, from the synthetic study) | Left-labelled `[t, t + dt)` | The left label makes occupancy lead CO2 by dt/2. On synthetic data this biased V by +40 %; centring cut the bias to about +6 % (`alignment.csv`), and all models improved. |
+| D7 | **Centre** the occupancy interval on the CO2 timestamp, `[t − dt/2, t + dt/2)`. (AI, from the synthetic study) | Left-labelled `[t, t + dt)` | The left label makes occupancy lead CO2 by dt/2. On synthetic data at 15 min this biased V by +31–52 % (median +47 %); centring cut the bias to +2–19 % (median +14 %) (`alignment.csv`), and all models improved. |
 | D8 | **Exclude frozen env sensors** (fewer than 100 unique timestamps) and drop exact re-sent payloads. | Keep all rows | 3 of 5 env sensors re-send one identical payload 11k–59k times. 137k of 179k rows are duplicates (`real_audit_timeline.png`). |
 | D9 | **Associate sensors with spaces from the data**, using correlation of CO2 and headcount after removing each series' time-of-week mean. | Trust the location sheet | The sheet ties no working env sensor to a counted space, and its OCC tab is labelled "SpaceFloorIDs Invalid". Removing the shared weekly pattern stops "both busy during office hours" from creating a false match. |
 | D10 | Primary pair: sensor **…0869** with space **3e5a14df** (residual r = 0.65, 25 labelled days). Weaker pairs (r = 0.41, 0.33) are **controls**. | Use only the primary pair | The controls are a negative check. If CO2 carried no room-level information, primary and controls would score alike. They don't: forest R² is 0.51 vs 0.27–0.40. |

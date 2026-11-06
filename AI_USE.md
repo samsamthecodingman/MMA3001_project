@@ -5,11 +5,10 @@
 | Tool | Version / access | Used for |
 |---|---|---|
 | Anthropic Claude (Claude Code, cloud session) | Claude Opus-class main agent with Sonnet-class sub-agents, Oct 2026 | Planning, data audit, code, tests, analysis runs, figures, documentation, report draft |
-| Claude (chat) | earlier in semester | Mid-semester test cheat-sheet (not part of this project) |
 
 ## 2. What the AI did (approximate contribution)
 
-| Area | AI contribution | Student contribution |
+| Area | AI contribution | My contribution |
 |---|---|---|
 | Problem and dataset choice | Proposed the CO2 mass-balance vs ML framing within Dataset 2 | Chose to use the MSI building dataset; set the goal (a virtual occupancy sensor useful for demand-controlled ventilation) and the constraints (CPU only, reproducible, verified numerics) |
 | Data access | — | Downloaded the restricted data and uploaded it to a private GitHub release |
@@ -23,7 +22,7 @@ as it is done responsibly"), and it is disclosed here in full.
 
 ## 3. Why AI was used
 
-- The unit explicitly allows unrestricted AI use.
+- The unit permits AI use throughout the project, provided it is disclosed and used responsibly.
 - The workload is high: a working, tested, documented pipeline on a 9-million-row dataset in limited time.
 - I wanted to treat the project as an engineering manager would: define the problem, set acceptance criteria, and judge evidence, rather than spend most of the time on syntax. The bottleneck in this problem is deciding what to trust (messy data, wrong metadata, easily fooled metrics), and that is where I chose to spend my effort.
 
@@ -33,27 +32,26 @@ These checks are part of the repository, so they can be re-run:
 
 - **Verification against known truth.** Convergence orders (Euler 0.97, RK4 4.14) were checked against theory. Calibration recovers V, Q and C_out from manufactured data. The vectorised solvers and aggregation were checked against loop references (`tests/`, 27 tests).
 - **Hand-calculated test case** for the headcount aggregation (`tests/test_io.py`).
-- **Independent review.** A separate AI reviewer agent audited the code for leakage and numerical bugs; its findings are listed in §5.
 - **Plausibility checks.** Physical parameter ranges, controls in the validation, and a baseline that any sensor model must beat.
-- **My own check: independent review.** I did not want the same agent that wrote the code to be the only one checking it, so I commissioned a separate reviewer agent to audit the work. That review is what exposed the misleading F1 score (item 8 below).
+- **Untrusted metadata.** The provided location sheet was wrong or incomplete, so it was not relied on; the sensor–space pairing was inferred statistically and tested with control pairs.
+- **Independent review (my addition).** I did not want the same agent that wrote the code to be the only one checking it, so I commissioned a separate reviewer agent to audit the code for leakage and numerical bugs. That review exposed the misleading F1 score (§5, item 8).
 
 ## 5. Errors and unhelpful output produced by the AI (caught and fixed)
 
-The AI's own first attempts contained these errors. All were caught by tests or result checks before the final results:
+The AI's own first attempts contained these errors. All were caught by tests, result checks or the independent review before the final results:
 
 1. **Wrong timestamps.** Datetime conversion used `asi8 / 1e9`, which assumes nanoseconds. Pandas 3 stores microseconds, so timestamps were wrong by a factor of 1000. A hand-calculated test caught it, and a resolution-independent helper replaced it.
 2. **Wrong initial state** in the `lfilter` solver (`zi`). The equivalence test against the loop solver caught it.
 3. **Calibration crashed on gaps.** The Savitzky–Golay derivative crashed on NaN gaps, so the physics model initially "failed" on synthetic data. Fixed by filtering each contiguous run separately.
-4. **Target misalignment.** Labelling interval-mean occupancy at the interval start biased the calibrated volume by about +40 %. Found by a synthetic sensitivity study and fixed by centring.
+4. **Target misalignment.** Labelling interval-mean occupancy at the interval start biased the calibrated volume by about +47 % at 15 min (median over synthetic rooms). Found by a synthetic sensitivity study and fixed by centring, which cut the bias to about +14 %.
 5. **Train/test split over the wrong span.** The first real-data run split over the full CO2 record, not the span with labels, so training periods had no labels and every R² was negative. Fixed by trimming to the paired span.
 6. **Inappropriate validation design.** A purely chronological test week fell in the exam period. The AI initially reported the negative R² values before diagnosing the regime shift and adding blocked CV.
-7. **Library API change.** A sub-agent called `MLPRegressor(hidden, ...)` positionally, but newer scikit-learn changed the first argument to `loss`, so the call failed.
+7. **Library API change.** A sub-agent called `MLPRegressor(hidden, ...)` positionally, but newer scikit-learn changed the first argument to `loss`, so the call failed. Fixed by passing the layer sizes by keyword (`hidden_layer_sizes=`).
 8. **Misleading metric.** The first report presented F1 = 0.87 as evidence of skill. The independent AI reviewer showed that a constant "occupied" prediction scores the same, so balanced accuracy replaced it. The same review also flagged pair-selection optimism and uneven label coverage, both now stated as limitations.
-9. **Unverified metadata.** The provided location sheet was wrong or incomplete. The AI did not trust it, and inferred the sensor–space pairing statistically with controls instead.
 
 **My intervention:** most of the errors above were caught by the AI's own tests and checks. The one I added was a structural safeguard: because the same agent wrote and tested the code, I commissioned a separate reviewer agent to audit it. Finding 8, and the limitations it flagged, came from that review.
 
-## 6. Decisions that remain the student's responsibility
+## 6. Decisions that remain my responsibility
 
 - Final choice of problem framing and acceptance of the inferred sensor–space pairing.
 - Every claim in the report and every number presented in the interview.
